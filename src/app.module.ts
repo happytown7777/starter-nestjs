@@ -26,7 +26,7 @@ import { DiaryTopic } from './diary/entities/diary-topic.entity';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'root',
+      password: process.env.DB_PASSWORD || 'root',
       database: 'haruhana',
       entities: [User, Diary, DiaryTopic],
       synchronize: true,
