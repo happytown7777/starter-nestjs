@@ -15,6 +15,6 @@ async function bootstrap() {
     origin: 'https://haruhana-happytown.com/',
     credentials: true,
   });
-  await app.listen(443);
+  await app.listen(80);
 }
 bootstrap();
