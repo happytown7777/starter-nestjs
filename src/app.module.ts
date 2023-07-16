@@ -23,12 +23,11 @@ import { DiaryTopic } from './diary/entities/diary-topic.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      // host: 'localhost',
+      host: '154.41.228.187',
       port: 3306,
-      // username: 'root',
-      // password: 'root',
-      username: 'debian-sys-maint',
-      password: '3L26hNGNJbTofwca',
+      username: 'root',
+      password: 'root',
       database: 'haruhana',
       entities: [User, Diary, DiaryTopic],
       synchronize: true,
