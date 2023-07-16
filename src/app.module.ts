@@ -28,7 +28,7 @@ import { DiaryTopic } from './diary/entities/diary-topic.entity';
       // username: 'root',
       // password: 'root',
       username: 'debian-sys-maint',
-      password: '3L26hNGNJbTofwca',
+      password: 'do52uG9wnrRKYl2nf3cC',
       database: 'haruhana',
       entities: [User, Diary, DiaryTopic],
       synchronize: true,
