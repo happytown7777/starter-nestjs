@@ -25,12 +25,11 @@ import { Family } from './family/entities/family.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      // host: '154.41.228.187',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'haruhana',
+      host: process.env.DB_HOSTNAME,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [User, Diary, DiaryTopic, Family],
       synchronize: true,
       // dropSchema: true
