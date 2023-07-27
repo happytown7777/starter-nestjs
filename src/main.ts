@@ -8,7 +8,6 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
-  // await app.listen(8000);
-  await app.listen(3000);
+  await app.listen(8000);
 }
 bootstrap();

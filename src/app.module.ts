@@ -18,18 +18,20 @@ import { DiaryService } from './diary/diary.service';
 import { NotificationController } from './notification/notification.controller';
 import { NotificationModule } from './notification/notification.module';
 import { DiaryTopic } from './diary/entities/diary-topic.entity';
+import { FamilyModule } from './family/family.module';
+import { Family } from './family/entities/family.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      // host: 'localhost',
-      host: '154.41.228.187',
+      host: 'localhost',
+      // host: '154.41.228.187',
       port: 3306,
       username: 'root',
       password: 'root',
       database: 'haruhana',
-      entities: [User, Diary, DiaryTopic],
+      entities: [User, Diary, DiaryTopic, Family],
       synchronize: true,
       // dropSchema: true
     }),
@@ -42,8 +44,9 @@ import { DiaryTopic } from './diary/entities/diary-topic.entity';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    TypeOrmModule.forFeature([User, Diary, DiaryTopic]),
+    TypeOrmModule.forFeature([User, Diary, DiaryTopic, Family]),
     NotificationModule,
+    FamilyModule,
   ],
   controllers: [AppController, UserController, DiaryController],
   providers: [AppService, UserService, DiaryService],

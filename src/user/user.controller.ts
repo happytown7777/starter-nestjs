@@ -1,8 +1,9 @@
 
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UploadedFiles, Put, Req, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UploadedFiles, Put, Req, Res, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { User } from "./entities/user.entity";
 import { UserService } from "./user.service";
 import { JwtService } from '@nestjs/jwt'
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller('/auth')
 export class UserController {
@@ -39,7 +40,14 @@ export class UserController {
 
     @Get('/profile/me')
     async GetMyProfile(@Res() response, @Req() user: User) {
-        return response.status(HttpStatus.OK).json({
-        });
+        const newUSer = await this.userServerice.getOne(user.email);
+        return response.status(HttpStatus.OK).json(newUSer);
     }
+
+    @Post('/upload-photo')
+    @UseInterceptors(FileInterceptor('file'))
+    async UplaodPhoto(@UploadedFile() file: Express.Multer.File) {
+        console.log(file);
+    }
+
 }

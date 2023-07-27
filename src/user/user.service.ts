@@ -2,9 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OAuth2Client } from 'google-auth-library';
+import { Family } from 'src/family/entities/family.entity';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -13,7 +14,7 @@ const client = new OAuth2Client(
 
 @Injectable()
 export class UserService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>) { }
+    constructor(@InjectRepository(User) private usersRepository: Repository<User>, @InjectRepository(Family) private familyRepository: Repository<Family>) { }
 
     async signup(user: User): Promise<User> {
         const salt = await bcrypt.genSalt();
@@ -25,6 +26,7 @@ export class UserService {
             avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
             password: hash,
             emailVeiified: true,
+            family: null,
         }
         const newUser = await this.usersRepository.save(reqBody);
         return newUser;
@@ -32,6 +34,7 @@ export class UserService {
 
     async signin(user: User, jwt: JwtService): Promise<any> {
         const foundUser = await this.usersRepository.findOne({ where: { email: user.email } });
+        console.log(foundUser);
         if (foundUser) {
             const { password } = foundUser;
             if (bcrypt.compare(user.password, password)) {
@@ -54,7 +57,7 @@ export class UserService {
             idToken: authToken,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
-        console.log(ticket.getPayload());
+        // console.log(ticket.getPayload());
         const payload = ticket.getPayload();
         const foundUser = await this.usersRepository.findOne({ where: { email: payload.email } });
         if (foundUser) {
@@ -70,4 +73,5 @@ export class UserService {
     async getOne(email: string): Promise<User> {
         return this.usersRepository.findOne({ where: { email: email } });
     }
+
 }

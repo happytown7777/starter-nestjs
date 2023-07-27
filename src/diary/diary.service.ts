@@ -13,12 +13,11 @@ export class DiaryService {
     ) { }
 
     async getAllTopics(): Promise<DiaryTopic[]> {
-        return this.diaryTopicRepository.find({});
+        return await this.diaryTopicRepository.find({});
     }
 
     async getDiaryList(userData): Promise<Diary[]> {
-        const result = await this.diaryRepository.findBy({ user: userData.id });
-        console.log(result);
+        const result = await this.diaryRepository.find({where: { user: userData.id }, order: { date: 'DESC' }});
         return result;
     }
 
