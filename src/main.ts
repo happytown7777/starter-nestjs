@@ -6,7 +6,9 @@ import * as cors from 'cors';
 import { ExpressAdapter } from '@nestjs/platform-express';
 
 const server = Express();
-server.use(cors());
+server.use(cors({
+  origin: false,
+}));
 server.get('/', (req, res) => res.send('ok'));
 server.get('/_ah/health', (req, res) => res.send('ok'));
 server.get('/_ah/start', (req, res) => res.send('ok'));
