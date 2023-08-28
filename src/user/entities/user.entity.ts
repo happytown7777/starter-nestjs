@@ -1,4 +1,5 @@
 import { Family } from "src/family/entities/family.entity";
+import { Settings } from "src/settings/entities/settings.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -7,27 +8,51 @@ export class User {
     id: number;
 
     @Column()
-    firstName: string;
+    fullName: string;
 
     @Column()
-    lastName: string;
+    username: string;
 
     @Column()
+    birthdate: Date;
+
+    @Column({ nullable: true })
     avatar: string;
 
-    @Column({ unique: true })
+    @Column({ unique: true, nullable: true })
     email: string;
 
-    @Column()
+    @Column({ nullable: true })
     password: string;
 
     @Column({ default: true })
     emailVerified: boolean;
 
+    @Column({ default: true })
+    onboarding: boolean;
+
+    @Column({ default: 0 })
+    step: number;
+
     @Column({ name: 'family_id', nullable: true })
     familyId?: number | null;
 
-    @ManyToOne(() => Family, { cascade: true, nullable: true, eager: true })
+    @ManyToOne(() => Family, { cascade: false, nullable: true, eager: true })
     @JoinColumn({ name: 'family_id' })
     family: Family | null;
+
+    @OneToOne(() => Settings, settings => settings.user, { cascade: true, nullable: true, eager: true })
+    @JoinColumn()
+    settings: Settings | null;
+
+    @Column({ nullable: true, name: 'guardian_id' })
+    guardianId: number | null;
+
+    @ManyToOne(() => User, { nullable: true, eager: false })
+    @JoinColumn({ name: 'guardian_id' })
+    gurdian: User | null;
+
+    // @OneToMany(() => User, (user) => user.gurdian)
+    // @JoinColumn({ name: 'guardianId' })
+    // children: User[];
 }

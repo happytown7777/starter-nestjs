@@ -66,4 +66,14 @@ export class FamilyService {
         }
     }
 
+    async findMember(email): Promise<any> {
+        try {
+            const members = await this.usersRepository.find({ where: { email: Like(`%${email}%`) } });
+            return { members, };
+        }
+        catch (e) {
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
 }

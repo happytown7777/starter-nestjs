@@ -38,4 +38,10 @@ export class FamilyController {
         return response.status(HttpStatus.OK).json(res);
     }
 
+    @Post('/member')
+    async FindMember(@Res() response, @Body() body) {
+        const res = await this.familyServerice.findMember(body.email);
+        return response.status(HttpStatus.OK).json(res);
+    }
+
 }

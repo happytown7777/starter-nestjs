@@ -14,12 +14,11 @@ export class UserController {
     }
 
     @Post('/signup')
-    async Signup(@Res() response, @Body() user: User) {
-        const newUSer = await this.userServerice.signup(user);
-        return response.status(HttpStatus.CREATED).json({
-            newUSer
-        })
+    async Signup(@Res() response, @Body() user) {
+        const res = await this.userServerice.signup(user);
+        return response.status(HttpStatus.CREATED).json(res)
     }
+
     @Post('/login')
     async SignIn(@Res() response, @Body() user: User) {
         const token = await this.userServerice.signin(user, this.jwtService);
@@ -32,6 +31,18 @@ export class UserController {
         return response.status(HttpStatus.OK).json(token)
     }
 
+    @Post('/save')
+    async SaveInfo(@Res() response, @Body() body) {
+        const res = await this.userServerice.saveInfo(body);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
+    @Post('/check-guardian')
+    async CheckGuardian(@Res() response, @Body() body) {
+        const res = await this.userServerice.checkGuardian(body);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
     @Get('/setting')
     async GetSetting(@Res() response, @Req() user: User) {
         return response.status(HttpStatus.OK).json({
@@ -39,9 +50,16 @@ export class UserController {
     }
 
     @Get('/profile/me')
-    async GetMyProfile(@Res() response, @Req() user: User) {
-        const newUSer = await this.userServerice.getOne(user.email);
+    async GetMyProfile(@Res() response, @Req() req) {
+        console.log(req.user);
+        const newUSer = await this.userServerice.getOne(req.user.email);
         return response.status(HttpStatus.OK).json(newUSer);
+    }
+
+    @Put('/profile')
+    async UpdateProfile(@Res() response, @Body() body, @Req() req) {
+        await this.userServerice.updateProfile(body, req.user.id);
+        return response.status(HttpStatus.OK).json({});
     }
 
     @Post('/upload-photo')
