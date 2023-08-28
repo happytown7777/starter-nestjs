@@ -5,10 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     methods: ["GET", "POST", "PUT", "DELETE"],
-    origin: [
-      'http://localhost:3000',
-      'https://haruhana-happytown.com',
-    ],
+    origin: '*',
     // credentials: true,
   });
   await app.listen(process.env.APP_PORT || 3000);
