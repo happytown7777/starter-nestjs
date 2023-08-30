@@ -8,6 +8,8 @@ import { OAuth2Client } from 'google-auth-library';
 import { Family } from 'src/family/entities/family.entity';
 import * as moment from 'moment-timezone';
 import { Settings } from 'src/settings/entities/settings.entity';
+import EmailService from 'src/email/email.service';
+import { resetPasswordTemplate } from 'src/email/templates/reset-password.template';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -16,7 +18,7 @@ const client = new OAuth2Client(
 
 @Injectable()
 export class UserService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>, @InjectRepository(Family) private familyRepository: Repository<Family>, @InjectRepository(Settings) private settingsRepository: Repository<Settings>,) { }
+    constructor(private emailService: EmailService, @InjectRepository(User) private usersRepository: Repository<User>, @InjectRepository(Family) private familyRepository: Repository<Family>, @InjectRepository(Settings) private settingsRepository: Repository<Settings>,) { }
 
     async signup(user): Promise<any> {
         let error = {};
@@ -90,6 +92,67 @@ export class UserService {
             };
         }
         // return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+    }
+
+    async resetPassword(email: string, jwt: JwtService): Promise<any> {
+        const foundUser = await this.usersRepository.findOne({ where: { email } });
+        if (foundUser) {
+            const token = jwt.sign({ email }, {
+                secret: "haruhana",
+                expiresIn: 21600,
+            });
+            const res = await this.emailService.sendMail({
+                from: process.env.EMAIL_USERNAME,
+                to: email,
+                subject: "Reset your password",
+                html: resetPasswordTemplate('https://haruhana-happytown.com/auth/change-password?token=' + token),
+            });
+            console.log(res, "email result");
+            return { success: Boolean(res) };
+        }
+        return { success: false, error: "No matching account. Please check email." }
+    }
+
+    async verifyPasswordToken(token: string, jwt: JwtService): Promise<any> {
+        try {
+            const payload = await jwt.verify(token, {
+                secret: "haruhana",
+            });
+
+            if (typeof payload === 'object' && 'email' in payload) {
+                return { success: true };
+            }
+
+            return { success: false, error: "No matching account. Please check email." }
+        } catch (error) {
+            if (error?.name === 'TokenExpiredError') {
+                return { success: false, error: "Password reset token expired" }
+            }
+            return { success: false, error: "Bad Token" }
+        }
+
+    }
+
+    async changePassword(password: string, token: string, jwt: JwtService): Promise<any> {
+        try {
+            const payload = await jwt.verify(token, {
+                secret: "haruhana",
+            });
+
+            if (typeof payload === 'object' && 'email' in payload) {
+                const salt = await bcrypt.genSalt();
+                const hash = await bcrypt.hash(password, salt);
+                await this.usersRepository.update({ email: payload.email }, { password: hash });
+                return { success: true };
+            }
+
+            return { success: false, error: "No matching account. Please check email." }
+        } catch (error) {
+            if (error?.name === 'TokenExpiredError') {
+                return { success: false, error: "Password reset token expired" }
+            }
+            return { success: false, error: "Bad Token" }
+        }
     }
 
     async saveInfo(body): Promise<User> {

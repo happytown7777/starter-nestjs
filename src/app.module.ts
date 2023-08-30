@@ -28,6 +28,7 @@ import { SettingsService } from './settings/settings.service';
 import { FileController } from './file/file.controller';
 import { FileService } from './file/file.service';
 import { MulterModule } from '@nestjs/platform-express';
+import EmailService from './email/email.service';
 
 @Module({
   imports: [
@@ -61,7 +62,7 @@ import { MulterModule } from '@nestjs/platform-express';
     SettingsModule,
   ],
   controllers: [AppController, UserController, DiaryController, SettingsController, FileController],
-  providers: [AppService, UserService, DiaryService, SettingsService, FileService],
+  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
@@ -71,6 +72,9 @@ export class AppModule {
         ...[
           { path: '/auth/login', method: RequestMethod.POST },
           { path: '/auth/google-login', method: RequestMethod.POST },
+          { path: '/auth/reset-password', method: RequestMethod.POST },
+          { path: '/auth/verify-password-token', method: RequestMethod.POST },
+          { path: '/auth/change-password', method: RequestMethod.POST },
           { path: '/auth/signup', method: RequestMethod.POST },
           { path: '/diary/topics', method: RequestMethod.GET },
           { path: '/uploads/(.*)', method: RequestMethod.GET },

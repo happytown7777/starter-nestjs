@@ -25,6 +25,24 @@ export class UserController {
         return response.status(HttpStatus.OK).json(token)
     }
 
+    @Post('/reset-password')
+    async ResetPassword(@Res() response, @Body() body) {
+        const res = await this.userServerice.resetPassword(body['email'], this.jwtService);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
+    @Post('/verify-password-token')
+    async VerifyPasswordToken(@Res() response, @Body() body) {
+        const res = await this.userServerice.verifyPasswordToken(body['token'], this.jwtService);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
+    @Post('/change-password')
+    async ChangePassword(@Res() response, @Body() body) {
+        const res = await this.userServerice.changePassword(body['password'], body['token'], this.jwtService);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
     @Post('/google-login')
     async GoogleLogin(@Res() response, @Body() body) {
         const token = await this.userServerice.googleLogin(body.authToken, this.jwtService);
