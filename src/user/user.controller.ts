@@ -43,6 +43,12 @@ export class UserController {
         return response.status(HttpStatus.OK).json(res)
     }
 
+    @Post('/update-password')
+    async UpdatePassword(@Res() response, @Body() body, @Req() req) {
+        const res = await this.userServerice.updatePassword(req.user.email, body['currentPassword'], body['newPassword'], this.jwtService);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
     @Post('/google-login')
     async GoogleLogin(@Res() response, @Body() body) {
         const token = await this.userServerice.googleLogin(body.authToken, this.jwtService);
@@ -76,8 +82,8 @@ export class UserController {
 
     @Put('/profile')
     async UpdateProfile(@Res() response, @Body() body, @Req() req) {
-        await this.userServerice.updateProfile(body, req.user.id);
-        return response.status(HttpStatus.OK).json({});
+        const res = await this.userServerice.updateProfile(body, req.user.id);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('/upload-photo')

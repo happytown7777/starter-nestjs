@@ -58,10 +58,10 @@ export class UserService {
 
     async signin(user: User, jwt: JwtService): Promise<any> {
         const foundUser = await this.usersRepository.findOne({ where: { email: user.email } });
-        console.log(foundUser);
+        console.log(foundUser, user.password);
         if (foundUser) {
             const { password } = foundUser;
-            if (bcrypt.compare(user.password, password)) {
+            if (await bcrypt.compare(user.password, password)) {
                 const payload = { email: foundUser.email, fullName: foundUser.fullName, avatar: foundUser.avatar };
                 return {
                     accessToken: jwt.sign(payload, {
@@ -155,6 +155,23 @@ export class UserService {
         }
     }
 
+    async updatePassword(email: string, currentPassword: string, newPassword: string, jwt: JwtService): Promise<any> {
+        const foundUser = await this.usersRepository.findOne({ where: { email } });
+        console.log(email, currentPassword, newPassword, foundUser.password);
+        if (foundUser) {
+            const validPassword = await bcrypt.compare(currentPassword, foundUser.password);
+            console.log(validPassword);
+            if (!validPassword) {
+                return { success: false, error: "Incorrect current password." }
+            }
+            const salt = await bcrypt.genSalt();
+            const hash = await bcrypt.hash(newPassword, salt);
+            await this.usersRepository.update({ email: email }, { password: hash });
+            return { success: true };
+        }
+        return { success: false, error: "No matching account. Please check email." }
+    }
+
     async saveInfo(body): Promise<User> {
         const newUser = await this.usersRepository.save(body);
         return newUser;
@@ -165,7 +182,7 @@ export class UserService {
         if (user) {
             await this.usersRepository.update({ id: user_id }, body);
         }
-        return user;
+        return body;
     }
 
     async checkGuardian(body): Promise<any> {
