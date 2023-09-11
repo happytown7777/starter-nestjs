@@ -3,8 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DiaryModule } from './diary/diary.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
-import { Diary } from './diary/entities/diary.entity';
 import { UserModule } from './user/user.module';
 import { isAuthenticated } from './app.middleware';
 import { JwtModule } from '@nestjs/jwt';
@@ -17,11 +15,8 @@ import { UserService } from './user/user.service';
 import { DiaryService } from './diary/diary.service';
 import { NotificationController } from './notification/notification.controller';
 import { NotificationModule } from './notification/notification.module';
-import { DiaryTopic } from './diary/entities/diary-topic.entity';
 import { FamilyModule } from './family/family.module';
-import { Family } from './family/entities/family.entity';
 import { ConfigModule } from '@nestjs/config';
-import { Settings } from './settings/entities/settings.entity';
 import { SettingsModule } from './settings/settings.module';
 import { SettingsController } from './settings/settings.controller';
 import { SettingsService } from './settings/settings.service';
@@ -29,6 +24,8 @@ import { FileController } from './file/file.controller';
 import { FileService } from './file/file.service';
 import { MulterModule } from '@nestjs/platform-express';
 import EmailService from './email/email.service';
+import { SeedService } from './seed/seed.service';
+import { entities } from './db-entitles';
 
 @Module({
   imports: [
@@ -40,7 +37,7 @@ import EmailService from './email/email.service';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       port: parseInt(process.env.DB_PORT),
-      entities: [User, Diary, DiaryTopic, Family, Settings],
+      entities,
       synchronize: true,
       // dropSchema: true
     }),
@@ -56,13 +53,13 @@ import EmailService from './email/email.service';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    TypeOrmModule.forFeature([User, Diary, DiaryTopic, Family, Settings]),
+    TypeOrmModule.forFeature(entities),
     NotificationModule,
     FamilyModule,
     SettingsModule,
   ],
   controllers: [AppController, UserController, DiaryController, SettingsController, FileController],
-  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService],
+  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

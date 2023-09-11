@@ -10,6 +10,7 @@ import * as moment from 'moment-timezone';
 import { Settings } from 'src/settings/entities/settings.entity';
 import EmailService from 'src/email/email.service';
 import { resetPasswordTemplate } from 'src/email/templates/reset-password.template';
+import { UserEmotions } from './entities/userEmotions.entity';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -18,7 +19,13 @@ const client = new OAuth2Client(
 
 @Injectable()
 export class UserService {
-    constructor(private emailService: EmailService, @InjectRepository(User) private usersRepository: Repository<User>, @InjectRepository(Family) private familyRepository: Repository<Family>, @InjectRepository(Settings) private settingsRepository: Repository<Settings>,) { }
+    constructor(
+        private emailService: EmailService,
+        @InjectRepository(User) private usersRepository: Repository<User>,
+        @InjectRepository(Family) private familyRepository: Repository<Family>,
+        @InjectRepository(Settings) private settingsRepository: Repository<Settings>,
+        @InjectRepository(UserEmotions) private userEmotionsRepository: Repository<UserEmotions>,
+    ) { }
 
     async signup(user): Promise<any> {
         let error = {};
@@ -65,7 +72,7 @@ export class UserService {
                 const payload = { email: foundUser.email, fullName: foundUser.fullName, avatar: foundUser.avatar };
                 return {
                     accessToken: jwt.sign(payload, {
-                        expiresIn: "8h"
+                        expiresIn: "24h"
                     }),
                     user: foundUser,
                 };
@@ -203,6 +210,23 @@ export class UserService {
 
     async getOne(email: string): Promise<User> {
         return this.usersRepository.findOne({ where: { email: email } });
+    }
+
+    async userEmotion(userId: number): Promise<string> {
+        const userEmotion = await this.userEmotionsRepository.findOne({ where: { userId: userId }, order: { createdAt: 'desc' } });
+        return userEmotion ? userEmotion.emotion : 'happy';
+    }
+
+    async updateUserEmotion(userId: number, emotion: string): Promise<void> {
+        const userEmotion = await this.userEmotionsRepository.findOne({ where: { userId: userId }, order: { updatedAt: 'desc' } });
+        console.log(moment(userEmotion.updatedAt).diff(moment(), 'hours'));
+        if(userEmotion && moment(userEmotion.updatedAt).diff(moment(), 'hours') > -1) {
+            userEmotion.emotion = emotion;
+            await this.userEmotionsRepository.save(userEmotion);
+        }
+        else {
+            await this.userEmotionsRepository.save({ userId, emotion });
+        }
     }
 
 }

@@ -2,23 +2,23 @@ import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn
 import { User } from "../../user/entities/user.entity";
 
 @Entity()
-export class Settings {
+export class UserEmotions {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ default: false })
-    allow_parental_control: boolean;
+    @Column()
+    emotion: string;
 
     @Column({ name: 'user_id' })
     userId: number;
 
-    @OneToOne(() => User)
+    @ManyToOne(() => User)
     @JoinColumn({ name: 'user_id' })
     user: User;
     
     @CreateDateColumn()
     createdAt: Date;
-
+    
     @UpdateDateColumn()
     updatedAt: Date;
 }

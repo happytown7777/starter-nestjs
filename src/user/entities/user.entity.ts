@@ -1,6 +1,6 @@
 import { Family } from "src/family/entities/family.entity";
 import { Settings } from "src/settings/entities/settings.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -41,7 +41,7 @@ export class User {
     @JoinColumn({ name: 'family_id' })
     family: Family | null;
 
-    @OneToOne(() => Settings, settings => settings.user, { cascade: true, nullable: true, eager: true })
+    @OneToOne(() => Settings, settings => settings.user, { cascade: false, nullable: true, eager: true })
     @JoinColumn()
     settings: Settings | null;
 
@@ -55,4 +55,10 @@ export class User {
     // @OneToMany(() => User, (user) => user.gurdian)
     // @JoinColumn({ name: 'guardianId' })
     // children: User[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

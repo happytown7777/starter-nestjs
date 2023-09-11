@@ -7,12 +7,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { Family } from 'src/family/entities/family.entity';
 import { Settings } from 'src/settings/entities/settings.entity';
 import EmailService from 'src/email/email.service';
+import { UserEmotions } from './entities/userEmotions.entity';
 
 @Module({
   controllers: [UserController],
   providers: [UserService, EmailService],
   imports: [    
-    TypeOrmModule.forFeature([User, Family, Settings]),
+    TypeOrmModule.forFeature([User, Family, Settings, UserEmotions]),
     JwtModule,
   ]
 })

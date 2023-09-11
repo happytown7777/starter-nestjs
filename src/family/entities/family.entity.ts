@@ -1,4 +1,4 @@
-import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, OneToMany } from "typeorm";
+import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 
 @Entity()
@@ -14,4 +14,10 @@ export class Family {
 
     @OneToMany(() => User, user => user.family)
     members: User[];
+    
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

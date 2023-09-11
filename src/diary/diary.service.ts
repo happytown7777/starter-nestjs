@@ -4,11 +4,13 @@ import { DiaryTopic } from 'src/diary/entities/diary-topic.entity';
 import { Repository } from 'typeorm';
 import { Diary } from './entities/diary.entity';
 import { parse } from 'path';
+import { DiaryLike } from './entities/diary-like.entity';
 
 @Injectable()
 export class DiaryService {
     constructor(
         @InjectRepository(DiaryTopic) private diaryTopicRepository: Repository<DiaryTopic>,
+        @InjectRepository(DiaryLike) private diaryLikeRepository: Repository<DiaryLike>,
         @InjectRepository(Diary) private diaryRepository: Repository<Diary>,
     ) { }
 
@@ -17,28 +19,73 @@ export class DiaryService {
     }
 
     async getDiaryList(userData): Promise<Diary[]> {
-        const result = await this.diaryRepository.find({where: { user: userData.id }, order: { date: 'DESC' }});
+        const result = await this.diaryRepository.find({ where: { user: userData.id }, order: { date: 'DESC' } });
         return result;
     }
 
-    async postDiary(values, user): Promise<string> {
+    async getDiaryData(diaryId): Promise<Diary> {
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId } });
+        return result;
+    }
+
+    async postDiary(diary, user): Promise<string> {
         try {
-            Object.keys(values).forEach(async key => {
-                if (!parseInt(key)) return;
-                const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(key) });
-                const diaryBody = {
-                    content: values[key],
-                    date: values.date,
-                    user: user,
-                    diaryTopic: topic,
-                }
-                if (topic && values[key]) {
-                    this.diaryRepository.save(diaryBody);
-                }
-            });
+            const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
+            const diaryBody = {
+                content: diary['content'],
+                date: diary['date'],
+                imageUrl: diary['imageUrl'],
+                user: user,
+                diaryTopic: topic,
+            }
+            if (topic) {
+                this.diaryRepository.save(diaryBody);
+            }
             return;
         } catch (err) {
             return err.message;
         }
     }
+
+    async editDiary(diary, user): Promise<string> {
+        try {
+            console.log(diary);
+            const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
+            const diaryBody = {
+                content: diary['content'],
+                imageUrl: diary['imageUrl'],
+                user: user,
+                diaryTopic: topic,
+            }
+            if (topic) {
+                this.diaryRepository.update({ id: diary['id'] }, diaryBody);
+            }
+            return;
+        } catch (err) {
+            return err.message;
+        }
+    }
+
+    async likeDiary(diaryId, userId): Promise<void> {
+        const exist = await this.diaryLikeRepository.findOne({ where: { userId, diaryId } });
+        if (exist) {
+            await this.diaryLikeRepository.delete({ userId, diaryId });
+        }
+        else {
+            await this.diaryLikeRepository.save({ userId, diaryId });
+        }
+    }
+
+    async deleteDiary(id, userId): Promise<{error?: string}> {
+        const exist = await this.diaryRepository.findOne({ where: { userId, id, } });
+        if (exist) {
+            await this.diaryLikeRepository.delete({ diaryId: id });
+            await this.diaryRepository.delete({ userId, id });
+            return {};
+        }
+        else {
+            return { error: "No matching diary. Please check details." };
+        }
+    }
+
 }

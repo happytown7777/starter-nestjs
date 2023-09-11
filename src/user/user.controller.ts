@@ -92,4 +92,16 @@ export class UserController {
         console.log(file);
     }
 
+    @Get('/user-emotion')
+    async GetUserEmotion(@Res() response, @Req() req) {
+        const emotion = await this.userServerice.userEmotion(req.user.id);
+        return response.status(HttpStatus.OK).json({ emotion });
+    }
+
+    @Post('/update-emotion')
+    async UpdateUserEmotion(@Res() response, @Body() body, @Req() req) {
+        await this.userServerice.updateUserEmotion(req.user.id, body['emotion']);
+        return response.status(HttpStatus.OK).json({ });
+    }
+
 }
