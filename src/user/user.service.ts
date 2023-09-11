@@ -219,7 +219,6 @@ export class UserService {
 
     async updateUserEmotion(userId: number, emotion: string): Promise<void> {
         const userEmotion = await this.userEmotionsRepository.findOne({ where: { userId: userId }, order: { updatedAt: 'desc' } });
-        console.log(moment(userEmotion.updatedAt).diff(moment(), 'hours'));
         if(userEmotion && moment(userEmotion.updatedAt).diff(moment(), 'hours') > -1) {
             userEmotion.emotion = emotion;
             await this.userEmotionsRepository.save(userEmotion);
