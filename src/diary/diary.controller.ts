@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { User } from 'src/user/entities/user.entity';
 
@@ -13,8 +13,8 @@ export class DiaryController {
     }
 
     @Get('')
-    async GetDiaryList(@Res() response, @Req() req) {
-        const diaryList = await this.diaryService.getDiaryList(req);
+    async GetDiaryList(@Res() response, @Req() req, @Query('sortBy') sortBy: string, @Query('topicFilter') topicFilter: string ) {
+        const diaryList = await this.diaryService.getDiaryList(req.user, sortBy, topicFilter);
         return response.status(HttpStatus.OK).json({ diaryList, });
     }
 

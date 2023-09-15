@@ -18,8 +18,25 @@ export class DiaryService {
         return await this.diaryTopicRepository.find({});
     }
 
-    async getDiaryList(userData): Promise<Diary[]> {
-        const result = await this.diaryRepository.find({ where: { user: userData.id }, order: { date: 'DESC' } });
+    async getDiaryList(userData, sortBy, topicFilter = ""): Promise<Diary[]> {
+        let query = this.diaryRepository.createQueryBuilder('diary')
+            .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
+            .leftJoinAndSelect('diary.likes', 'likes')
+            .where('diary.userId = :userId', { userId: userData.id });
+        if (topicFilter) {
+            query = query.andWhere('diary.diaryTopicId = :topicId', { topicId: topicFilter });
+        }
+        if (sortBy == 'trending') {
+            query = query.addSelect('COUNT(likes.id)', 'likesCount')
+                .groupBy('diary.id')
+                .groupBy('diary.id')
+                .orderBy('likesCount', 'DESC');
+        }
+        else {
+            query = query.orderBy('diary.date', 'DESC');
+        }
+        console.log(query.getQuery());
+        const result = await query.getMany();
         return result;
     }
 
@@ -76,7 +93,7 @@ export class DiaryService {
         }
     }
 
-    async deleteDiary(id, userId): Promise<{error?: string}> {
+    async deleteDiary(id, userId): Promise<{ error?: string }> {
         const exist = await this.diaryRepository.findOne({ where: { userId, id, } });
         if (exist) {
             await this.diaryLikeRepository.delete({ diaryId: id });
