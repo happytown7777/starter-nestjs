@@ -5,6 +5,7 @@ import { Family } from './family/entities/family.entity';
 import { DiaryTopic } from './diary/entities/diary-topic.entity';
 import { Diary } from './diary/entities/diary.entity';
 import { User } from './user/entities/user.entity';
+import { Roles } from './user/entities/roles.entity';
 
 export const entities = [
     User,
@@ -14,4 +15,5 @@ export const entities = [
     Settings,
     UserEmotions,
     DiaryLike,
+    Roles,
 ]

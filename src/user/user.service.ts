@@ -11,6 +11,7 @@ import { Settings } from 'src/settings/entities/settings.entity';
 import EmailService from 'src/email/email.service';
 import { resetPasswordTemplate } from 'src/email/templates/reset-password.template';
 import { UserEmotions } from './entities/userEmotions.entity';
+import { Roles } from './entities/roles.entity';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -25,6 +26,7 @@ export class UserService {
         @InjectRepository(Family) private familyRepository: Repository<Family>,
         @InjectRepository(Settings) private settingsRepository: Repository<Settings>,
         @InjectRepository(UserEmotions) private userEmotionsRepository: Repository<UserEmotions>,
+        @InjectRepository(Roles) private rolesRepository: Repository<Roles>,
     ) { }
 
     async signup(user): Promise<any> {
@@ -48,6 +50,7 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
+        const userRole = await this.rolesRepository.findOne({ where: { role: user.guardianId ? 'Parent' : 'Child' } });
         const reqBody = {
             fullName: user.fullName,
             birthdate: user.birthdate,
@@ -57,6 +60,7 @@ export class UserService {
             password: hash,
             emailVeiified: true,
             family: null,
+            roleId: userRole.id,
         }
         const newUser = await this.usersRepository.save(reqBody);
         await this.settingsRepository.upsert({ userId: newUser.id, allow_parental_control: user.allowParental, }, ['userId']);
@@ -219,7 +223,7 @@ export class UserService {
 
     async updateUserEmotion(userId: number, emotion: string): Promise<void> {
         const userEmotion = await this.userEmotionsRepository.findOne({ where: { userId: userId }, order: { updatedAt: 'desc' } });
-        if(userEmotion && moment(userEmotion.updatedAt).diff(moment(), 'hours') > -1) {
+        if (userEmotion && moment(userEmotion.updatedAt).diff(moment(), 'hours') > -1) {
             userEmotion.emotion = emotion;
             await this.userEmotionsRepository.save(userEmotion);
         }

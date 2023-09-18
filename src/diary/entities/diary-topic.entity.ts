@@ -11,6 +11,9 @@ export class DiaryTopic {
     @Column()
     description: string;    
     
+    @Column({nullable: true})
+    group: string;    
+    
     @Column()
     imgUrl: string;
 }
