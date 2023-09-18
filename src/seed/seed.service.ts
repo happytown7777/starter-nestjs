@@ -22,8 +22,8 @@ export class SeedService {
 
     async seedUsers() {
         const users = [
-            { fullName: 'Dev Parent', username: 'dev_parent', birthdate: '1980-01-01', email: 'dev-parent@email.com', password: 'password', role_id: 1, },
-            { fullName: 'Dev Child', username: 'dev_child', birthdate: '2010-01-01', email: 'dev-child@email.com', password: 'password', role_id: 2, },
+            { firstName: 'Dev', lastName: 'Parent', username: 'dev_parent', birthdate: '1980-01-01', email: 'dev-parent@email.com', password: 'password', role_id: 1, },
+            { firstName: 'Dev', lastName: 'Child', username: 'dev_child', birthdate: '2010-01-01', email: 'dev-child@email.com', password: 'password', role_id: 2, },
         ];
 
         for (const user of users) {

@@ -50,12 +50,14 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
-        const userRole = await this.rolesRepository.findOne({ where: { role: user.guardianId ? 'Parent' : 'Child' } });
+        const userRole = await this.rolesRepository.findOne({ where: { role: user.guardianId ? 'Child' : 'Parent' } });
         const reqBody = {
-            fullName: user.fullName,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: user.firstName + ' ' + user.lastName,
             birthdate: user.birthdate,
             username: user.username,
-            guardianId: null,
+            guardianId: user.guardianId,
             email: user.email,
             password: hash,
             emailVeiified: true,
@@ -73,7 +75,7 @@ export class UserService {
         if (foundUser) {
             const { password } = foundUser;
             if (await bcrypt.compare(user.password, password)) {
-                const payload = { email: foundUser.email, fullName: foundUser.fullName, avatar: foundUser.avatar };
+                const payload = { email: foundUser.email, firstName: foundUser.firstName, lastName: foundUser.lastName, avatar: foundUser.avatar };
                 return {
                     accessToken: jwt.sign(payload, {
                         expiresIn: "24h"
@@ -96,7 +98,7 @@ export class UserService {
         const payload = ticket.getPayload();
         const foundUser = await this.usersRepository.findOne({ where: { email: payload.email } });
         if (foundUser) {
-            const payload = { email: foundUser.email, fullName: foundUser.fullName, avatar: foundUser.avatar };
+            const payload = { email: foundUser.email, firstName: foundUser.firstName, lastName: foundUser.lastName, avatar: foundUser.avatar };
             return {
                 accessToken: jwt.sign(payload),
                 user: foundUser,
@@ -197,7 +199,7 @@ export class UserService {
     }
 
     async checkGuardian(body): Promise<any> {
-        const newUser = await this.usersRepository.findOne({ where: { email: body.email, fullName: body.fullName } });
+        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, } });
         if (newUser) {
             const age = moment().diff(newUser.birthdate, 'years');
             if (age > 16) {

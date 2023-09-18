@@ -72,6 +72,7 @@ export class AppModule {
           { path: '/auth/reset-password', method: RequestMethod.POST },
           { path: '/auth/verify-password-token', method: RequestMethod.POST },
           { path: '/auth/change-password', method: RequestMethod.POST },
+          { path: '/auth/check-guardian', method: RequestMethod.POST },
           { path: '/auth/signup', method: RequestMethod.POST },
           { path: '/diary/topics', method: RequestMethod.GET },
           { path: '/uploads/(.*)', method: RequestMethod.GET },
