@@ -27,7 +27,7 @@ export class DiaryService {
             .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
             .where('diary.userId = :userId', { userId: userData.id });
         if (param.withComments) {
-            query = query.leftJoinAndSelect('diary.comments', 'comments')
+            query = query.leftJoinAndSelect('diary.comments', 'comments').leftJoinAndSelect('comments.user', 'commentUser');
         }
         if (param.topicFilter) {
             query = query.andWhere('diary.diaryTopicId = :topicId', { topicId: param.topicFilter });
