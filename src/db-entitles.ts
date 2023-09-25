@@ -6,6 +6,7 @@ import { DiaryTopic } from './diary/entities/diary-topic.entity';
 import { Diary } from './diary/entities/diary.entity';
 import { User } from './user/entities/user.entity';
 import { Roles } from './user/entities/roles.entity';
+import { DiaryComment } from './diary/entities/diary-comments.entity';
 
 export const entities = [
     User,
@@ -16,4 +17,5 @@ export const entities = [
     UserEmotions,
     DiaryLike,
     Roles,
+    DiaryComment,
 ]

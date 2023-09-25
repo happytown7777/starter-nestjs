@@ -2,6 +2,7 @@ import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation
 import { User } from "../../user/entities/user.entity";
 import { DiaryTopic } from "./diary-topic.entity";
 import { DiaryLike } from "./diary-like.entity";
+import { DiaryComment } from "./diary-comments.entity";
 
 @Entity()
 export class Diary {
@@ -17,7 +18,7 @@ export class Diary {
     // @Column({ length: 255 })
     // title: string;
 
-    @Column({ length: 1024 })
+    @Column({ length: 8192 })
     imageUrl: string;
 
     @Column({ name: 'user_id' })
@@ -36,6 +37,9 @@ export class Diary {
 
     @OneToMany(() => DiaryLike, diaryLike => diaryLike.diary, { cascade: false, nullable: true, eager: true })
     likes: DiaryLike[];
+
+    @OneToMany(() => DiaryComment, diaryComment => diaryComment.diary, { cascade: false, nullable: true, eager: true })
+    comments: DiaryComment[];
 
     @CreateDateColumn()
     createdAt: Date;

@@ -44,18 +44,18 @@ export class User {
     @Column({ name: 'family_id', nullable: true })
     familyId?: number | null;
 
-    @ManyToOne(() => Family, { cascade: false, nullable: true, eager: true })
+    @ManyToOne(() => Family, { cascade: false, nullable: true, eager: false })
     @JoinColumn({ name: 'family_id' })
     family: Family | null;
 
     @Column({ name: 'role_id', nullable: true })
     roleId?: number | null;
 
-    @ManyToOne(() => Roles, { cascade: false, nullable: true, eager: true })
+    @ManyToOne(() => Roles, { cascade: false, nullable: true, eager: false })
     @JoinColumn({ name: 'role_id' })
     role: Roles | null;
 
-    @OneToOne(() => Settings, settings => settings.user, { cascade: false, nullable: true, eager: true })
+    @OneToOne(() => Settings, settings => settings.user, { cascade: false, nullable: true, eager: false })
     @JoinColumn()
     settings: Settings | null;
 

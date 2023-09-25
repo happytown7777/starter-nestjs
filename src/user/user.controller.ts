@@ -75,7 +75,6 @@ export class UserController {
 
     @Get('/profile/me')
     async GetMyProfile(@Res() response, @Req() req) {
-        console.log(req.user);
         const newUSer = await this.userServerice.getOne(req.user.email);
         return response.status(HttpStatus.OK).json(newUSer);
     }

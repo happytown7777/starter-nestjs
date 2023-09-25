@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Diary } from './entities/diary.entity';
 import { parse } from 'path';
 import { DiaryLike } from './entities/diary-like.entity';
+import { DiaryComment } from './entities/diary-comments.entity';
 
 @Injectable()
 export class DiaryService {
@@ -12,21 +13,26 @@ export class DiaryService {
         @InjectRepository(DiaryTopic) private diaryTopicRepository: Repository<DiaryTopic>,
         @InjectRepository(DiaryLike) private diaryLikeRepository: Repository<DiaryLike>,
         @InjectRepository(Diary) private diaryRepository: Repository<Diary>,
+        @InjectRepository(DiaryComment) private diaryCommentRepository: Repository<DiaryComment>,
     ) { }
 
     async getAllTopics(): Promise<DiaryTopic[]> {
         return await this.diaryTopicRepository.find({});
     }
 
-    async getDiaryList(userData, sortBy, topicFilter = ""): Promise<Diary[]> {
+    async getDiaryList(userData, param: any = {}): Promise<Diary[]> {
         let query = this.diaryRepository.createQueryBuilder('diary')
             .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
             .leftJoinAndSelect('diary.likes', 'likes')
+            .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
             .where('diary.userId = :userId', { userId: userData.id });
-        if (topicFilter) {
-            query = query.andWhere('diary.diaryTopicId = :topicId', { topicId: topicFilter });
+        if (param.withComments) {
+            query = query.leftJoinAndSelect('diary.comments', 'comments')
         }
-        if (sortBy == 'trending') {
+        if (param.topicFilter) {
+            query = query.andWhere('diary.diaryTopicId = :topicId', { topicId: param.topicFilter });
+        }
+        if (param.sortBy == 'trending') {
             query = query.addSelect('COUNT(likes.id)', 'likesCount')
                 .groupBy('diary.id')
                 .groupBy('diary.id')
@@ -41,7 +47,7 @@ export class DiaryService {
     }
 
     async getDiaryData(diaryId): Promise<Diary> {
-        const result = await this.diaryRepository.findOne({ where: { id: diaryId } });
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments'] });
         return result;
     }
 
@@ -103,6 +109,16 @@ export class DiaryService {
         else {
             return { error: "No matching diary. Please check details." };
         }
+    }
+
+    async addDiaryComment(id, userId, parentId, comment): Promise<{ error?: string }> {
+        await this.diaryCommentRepository.save({
+            userId,
+            diaryId: id,
+            parentId,
+            comment,
+        });
+        return { error: '' }
     }
 
 }

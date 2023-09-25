@@ -70,7 +70,7 @@ export class UserService {
     }
 
     async signin(user: User, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email: user.email } });
+        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'role', 'settings'] });
         console.log(foundUser, user.password);
         if (foundUser) {
             const { password } = foundUser;
@@ -215,7 +215,7 @@ export class UserService {
     }
 
     async getOne(email: string): Promise<User> {
-        return this.usersRepository.findOne({ where: { email: email } });
+        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'role', 'settings'] });
     }
 
     async userEmotion(userId: number): Promise<string> {

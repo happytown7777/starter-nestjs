@@ -12,9 +12,9 @@ export class DiaryController {
         return response.status(HttpStatus.OK).json({ topics, });
     }
 
-    @Get('')
-    async GetDiaryList(@Res() response, @Req() req, @Query('sortBy') sortBy: string, @Query('topicFilter') topicFilter: string ) {
-        const diaryList = await this.diaryService.getDiaryList(req.user, sortBy, topicFilter);
+    @Post('all')
+    async GetDiaryList(@Res() response, @Req() req, @Body() body: any) {
+        const diaryList = await this.diaryService.getDiaryList(req.user, body);
         return response.status(HttpStatus.OK).json({ diaryList, });
     }
 
@@ -41,10 +41,16 @@ export class DiaryController {
         await this.diaryService.likeDiary(id, req.user.id);
         return response.status(HttpStatus.OK).json();
     }
-    
+
     @Delete('/delete/:id')
     async deleteDiary(@Param('id') id: string, @Res() response, @Req() req) {
         const result = await this.diaryService.deleteDiary(id, req.user.id);
+        return response.status(HttpStatus.OK).json(result);
+    }
+
+    @Post('/:id/comment')
+    async addDiaryComment(@Param('id') id: string, @Res() response, @Req() req, @Body('comment') comment, @Body('parentId') parentId,) {
+        const result = await this.diaryService.addDiaryComment(id, req.user.id, parentId, comment);
         return response.status(HttpStatus.OK).json(result);
     }
 }
