@@ -41,17 +41,23 @@ export class User {
     @Column({ default: 0 })
     step: number;
 
+    @Column({ nullable: true })
+    custom_name: string;
+
+    @Column({ name: 'current_emotion', nullable: true })
+    currentEmotion: string;
+
     @Column({ name: 'family_id', nullable: true })
     familyId?: number | null;
 
-    @ManyToOne(() => Family, { cascade: false, nullable: true, eager: false })
+    @ManyToOne(() => Family, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'family_id' })
     family: Family | null;
 
     @Column({ name: 'role_id', nullable: true })
     roleId?: number | null;
 
-    @ManyToOne(() => Roles, { cascade: false, nullable: true, eager: false })
+    @ManyToOne(() => Roles, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'role_id' })
     role: Roles | null;
 

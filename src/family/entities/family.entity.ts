@@ -1,4 +1,4 @@
-import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 
 @Entity()
@@ -12,9 +12,15 @@ export class Family {
     @Column()
     description: string;
 
-    @OneToMany(() => User, user => user.family)
+    @OneToMany(() => User, user => user.family, { eager: true })
     members: User[];
-    
+
+    @OneToOne(() => User, user => user.family, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
+    owner: User;
+
+    @Column({ length: 1024, nullable: true })
+    imgUrl: string;
+
     @CreateDateColumn()
     createdAt: Date;
 

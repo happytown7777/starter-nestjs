@@ -6,10 +6,12 @@ import { Diary } from './entities/diary.entity';
 import { parse } from 'path';
 import { DiaryLike } from './entities/diary-like.entity';
 import { DiaryComment } from './entities/diary-comments.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class DiaryService {
     constructor(
+        @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(DiaryTopic) private diaryTopicRepository: Repository<DiaryTopic>,
         @InjectRepository(DiaryLike) private diaryLikeRepository: Repository<DiaryLike>,
         @InjectRepository(Diary) private diaryRepository: Repository<Diary>,
@@ -41,7 +43,6 @@ export class DiaryService {
         else {
             query = query.orderBy('diary.date', 'DESC');
         }
-        console.log(query.getQuery());
         const result = await query.getMany();
         return result;
     }
@@ -119,6 +120,36 @@ export class DiaryService {
             comment,
         });
         return { error: '' }
+    }
+
+    async getUserDiaryList(userId, familyId, param: any = {}): Promise<any> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (user.familyId !== familyId) {
+            return { error: 'Permission Not Allowed' }
+        }
+
+        let query = this.diaryRepository.createQueryBuilder('diary')
+            .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
+            .leftJoinAndSelect('diary.likes', 'likes')
+            .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
+            .where('diary.userId = :userId', { userId: userId });
+        if (param.withComments) {
+            query = query.leftJoinAndSelect('diary.comments', 'comments').leftJoinAndSelect('comments.user', 'commentUser');
+        }
+        if (param.topicFilter) {
+            query = query.andWhere('diary.diaryTopicId = :topicId', { topicId: param.topicFilter });
+        }
+        if (param.sortBy == 'trending') {
+            query = query.addSelect('COUNT(likes.id)', 'likesCount')
+                .groupBy('diary.id')
+                .groupBy('diary.id')
+                .orderBy('likesCount', 'DESC');
+        }
+        else {
+            query = query.orderBy('diary.date', 'DESC');
+        }
+        const result = await query.getMany();
+        return { diaryList: result };
     }
 
 }

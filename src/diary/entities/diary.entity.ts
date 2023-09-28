@@ -24,14 +24,14 @@ export class Diary {
     @Column({ name: 'user_id' })
     userId: number;
 
-    @ManyToOne(() => User, { cascade: false, nullable: false, eager: true })
+    @ManyToOne(() => User, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;
 
     @Column({ name: 'diary_topic_id' })
     diaryTopicId: number;
 
-    @ManyToOne(() => DiaryTopic, { cascade: false, nullable: false, eager: true })
+    @ManyToOne(() => DiaryTopic, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'diary_topic_id' })
     diaryTopic: DiaryTopic;
 

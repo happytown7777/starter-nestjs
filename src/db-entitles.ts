@@ -7,6 +7,8 @@ import { Diary } from './diary/entities/diary.entity';
 import { User } from './user/entities/user.entity';
 import { Roles } from './user/entities/roles.entity';
 import { DiaryComment } from './diary/entities/diary-comments.entity';
+import { FamilyMoto } from './family/entities/familyMoto.entity';
+import { FamilyMotoComment } from './family/entities/familyMotoComments.entity';
 
 export const entities = [
     User,
@@ -18,4 +20,6 @@ export const entities = [
     DiaryLike,
     Roles,
     DiaryComment,
+    FamilyMoto,
+    FamilyMotoComment,
 ]

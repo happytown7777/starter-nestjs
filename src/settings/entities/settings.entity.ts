@@ -12,10 +12,10 @@ export class Settings {
     @Column({ name: 'user_id' })
     userId: number;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;
-    
+
     @CreateDateColumn()
     createdAt: Date;
 

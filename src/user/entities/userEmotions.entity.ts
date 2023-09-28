@@ -12,13 +12,13 @@ export class UserEmotions {
     @Column({ name: 'user_id' })
     userId: number;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;
-    
+
     @CreateDateColumn()
     createdAt: Date;
-    
+
     @UpdateDateColumn()
     updatedAt: Date;
 }

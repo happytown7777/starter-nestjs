@@ -53,4 +53,10 @@ export class DiaryController {
         const result = await this.diaryService.addDiaryComment(id, req.user.id, parentId, comment);
         return response.status(HttpStatus.OK).json(result);
     }
+
+    @Post('/user/:id')
+    async getUserDiary(@Param('id') id: string, @Res() response, @Req() req, @Body() body,) {
+        const result = await this.diaryService.getUserDiaryList(id, req.user.family.id, body);
+        return response.status(HttpStatus.OK).json(result);
+    }
 }

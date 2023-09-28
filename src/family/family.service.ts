@@ -3,10 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { Family } from './entities/family.entity';
+import { FamilyMoto } from './entities/familyMoto.entity';
+import { FamilyMotoComment } from './entities/familyMotoComments.entity';
 
 @Injectable()
 export class FamilyService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>, @InjectRepository(Family) private familyRepository: Repository<Family>) { }
+    constructor(
+        @InjectRepository(User) private usersRepository: Repository<User>,
+        @InjectRepository(Family) private familyRepository: Repository<Family>,
+        @InjectRepository(FamilyMoto) private familyMotoRepository: Repository<FamilyMoto>,
+        @InjectRepository(FamilyMotoComment) private familyMotoCommentRepository: Repository<FamilyMotoComment>,
+    ) { }
 
 
     async createFamily(body): Promise<any> {
@@ -74,6 +81,80 @@ export class FamilyService {
         catch (e) {
             return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
         }
+    }
+
+    async getAllMotos(user): Promise<any> {
+        try {
+            const motos = await this.familyMotoRepository.find({ where: { familyId: user.familyId, }, order: { createdAt: 'DESC' }, relations: ['comments'] });
+            return { motos };
+        }
+        catch (e) {
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async getCurrentMoto(user): Promise<any> {
+        try {
+            const currentMoto = await this.familyMotoRepository.findOne({ where: { familyId: user.familyId, archived: false, }, order: { createdAt: 'DESC' }, relations: ['comments'] });
+            return { currentMoto };
+        }
+        catch (e) {
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async createMoto(user, body): Promise<any> {
+        try {
+            const newMoto = await this.familyMotoRepository.save({ name: body.name, description: body.description, familyId: user.familyId });
+            return { newMoto };
+        }
+        catch (e) {
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async updateMoto(body, id): Promise<any> {
+        try {
+            const newMoto = await this.familyMotoRepository.update(id, body);
+            return { newMoto };
+        }
+        catch (e) {
+            console.error(e);
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async archieveMoto(id): Promise<any> {
+        try {
+            const newMoto = await this.familyMotoRepository.update(id, { archived: true });
+            return { newMoto };
+        }
+        catch (e) {
+            console.error(e);
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async removeMoto(id): Promise<any> {
+        try {
+            const familyMoto = await this.familyMotoRepository.findOne({ where: { id } });
+            await this.familyMotoRepository.remove(familyMoto);
+            return { error: '' };
+        }
+        catch (e) {
+            console.error(e);
+            return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    async addFamilyMotoComment(id, userId, parentId, comment): Promise<{ error?: string }> {
+        await this.familyMotoCommentRepository.save({
+            userId,
+            familyMotoId: id,
+            parentId,
+            comment,
+        });
+        return { error: '' }
     }
 
 }

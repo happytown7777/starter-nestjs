@@ -1,9 +1,9 @@
 import { User } from "src/user/entities/user.entity";
 import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import { Diary } from "./diary.entity";
+import { FamilyMoto } from "./familyMoto.entity";
 
 @Entity()
-export class DiaryComment {
+export class FamilyMotoComment {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -17,12 +17,12 @@ export class DiaryComment {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ name: 'diary_id' })
-    diaryId: number;
+    @Column({ name: 'family_moto_id' })
+    familyMotoId: number;
 
-    @ManyToOne(() => Diary, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'diary_id' })
-    diary: Diary;
+    @ManyToOne(() => FamilyMoto, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'family_moto_id' })
+    familyMoto: FamilyMoto;
 
     @Column({ name: 'parent_id', nullable: true, })
     parentId: number;

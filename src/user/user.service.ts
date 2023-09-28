@@ -50,7 +50,13 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
-        const userRole = await this.rolesRepository.findOne({ where: { role: user.guardianId ? 'Child' : 'Parent' } });
+        const userRole = await this.rolesRepository.findOne({ where: { role: (user.guardianId || user.family_id) ? 'Child' : 'Parent' } });
+
+        if (!user.family_id && user.familyName) {
+            const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
+            user.family_id = newFamily.id;
+        }
+
         const reqBody = {
             firstName: user.firstName,
             lastName: user.lastName,
@@ -61,7 +67,7 @@ export class UserService {
             email: user.email,
             password: hash,
             emailVeiified: true,
-            family: null,
+            familyId: user.family_id,
             roleId: userRole.id,
         }
         const newUser = await this.usersRepository.save(reqBody);
@@ -199,18 +205,21 @@ export class UserService {
     }
 
     async checkGuardian(body): Promise<any> {
-        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, } });
+        const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
+        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
         if (newUser) {
-            const age = moment().diff(newUser.birthdate, 'years');
-            if (age > 16) {
-                return { guardianId: newUser.id };
-            }
-            else {
-                return { error: "This account is not old enough to be a guardian." };
-            }
+            // const age = moment().diff(newUser.birthdate, 'years');
+            // if (age > 16) {
+            //     return { guardianId: newUser.id };
+            // }
+            // else {
+            //     return { error: "This account is not old enough to be a guardian." };
+            // }
+            console.log(newUser)
+            return { guardianId: newUser.id, family: newUser.family };
         }
         else {
-            return { error: "No matching account. Please check details." };
+            return { error: "No matching Guardian account. Please check details." };
         }
     }
 
@@ -227,10 +236,15 @@ export class UserService {
         const userEmotion = await this.userEmotionsRepository.findOne({ where: { userId: userId }, order: { updatedAt: 'desc' } });
         if (userEmotion && moment(userEmotion.updatedAt).diff(moment(), 'hours') > -1) {
             userEmotion.emotion = emotion;
-            await this.userEmotionsRepository.save(userEmotion);
+            await this.userEmotionsRepository.update(userEmotion.id, userEmotion);
+            await this.usersRepository.update(userId, { currentEmotion: emotion });
         }
         else {
+            if(userEmotion && userEmotion.emotion === emotion) {
+                return;
+            }
             await this.userEmotionsRepository.save({ userId, emotion });
+            await this.usersRepository.update(userId, { currentEmotion: emotion });
         }
     }
 

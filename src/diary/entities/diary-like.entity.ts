@@ -13,7 +13,7 @@ export class DiaryLike {
     @Column({ name: 'diary_id' })
     diaryId: number;
 
-    @ManyToOne(() => Diary, { cascade: false, nullable: false, eager: false })
+    @ManyToOne(() => Diary, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'diary_id' })
     diary: Diary;
 
