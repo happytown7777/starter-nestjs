@@ -100,7 +100,12 @@ export class UserController {
     @Post('/update-emotion')
     async UpdateUserEmotion(@Res() response, @Body() body, @Req() req) {
         await this.userServerice.updateUserEmotion(req.user.id, body['emotion']);
-        return response.status(HttpStatus.OK).json({ });
+        return response.status(HttpStatus.OK).json({});
     }
 
+    @Post('/send-invitation')
+    async SendInvitation(@Res() response, @Body('email') email: string, @Body('link') link: string, @Req() req) {
+        await this.userServerice.sendInviteFamilyMember(email, link, req.user);
+        return response.status(HttpStatus.OK).json({});
+    }
 }

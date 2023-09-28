@@ -12,6 +12,7 @@ import EmailService from 'src/email/email.service';
 import { resetPasswordTemplate } from 'src/email/templates/reset-password.template';
 import { UserEmotions } from './entities/userEmotions.entity';
 import { Roles } from './entities/roles.entity';
+import { familyInviteTemplate } from 'src/email/templates/family-invite.template';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -50,7 +51,8 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
-        const userRole = await this.rolesRepository.findOne({ where: { role: (user.guardianId || user.family_id) ? 'Child' : 'Parent' } });
+        const isGuardian = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
+        const userRole = await this.rolesRepository.findOne({ where: { role: !isGuardian ? 'Child' : 'Parent' } });
 
         if (!user.family_id && user.familyName) {
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
@@ -240,12 +242,23 @@ export class UserService {
             await this.usersRepository.update(userId, { currentEmotion: emotion });
         }
         else {
-            if(userEmotion && userEmotion.emotion === emotion) {
+            if (userEmotion && userEmotion.emotion === emotion) {
                 return;
             }
             await this.userEmotionsRepository.save({ userId, emotion });
             await this.usersRepository.update(userId, { currentEmotion: emotion });
         }
+    }
+
+    async sendInviteFamilyMember(email: string, link: string, user: any): Promise<any> {
+        const res = await this.emailService.sendMail({
+            from: process.env.EMAIL_USERNAME,
+            to: email,
+            subject: "You are invited to join Haruhana Happy Town",
+            html: familyInviteTemplate({ link, user }),
+        });
+        console.log(familyInviteTemplate({ link, user }), "email result");
+        return { success: Boolean(res) };
     }
 
 }

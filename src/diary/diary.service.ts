@@ -47,9 +47,13 @@ export class DiaryService {
         return result;
     }
 
-    async getDiaryData(diaryId): Promise<Diary> {
+    async getDiaryData(diaryId, userId): Promise<any> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
         const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments'] });
-        return result;
+        if (result.user.familyId !== user.familyId) {
+            return { error: "Not Allowed" };
+        }
+        return { diary: result };
     }
 
     async postDiary(diary, user): Promise<string> {
@@ -125,7 +129,7 @@ export class DiaryService {
     async getUserDiaryList(userId, familyId, param: any = {}): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (user.familyId !== familyId) {
-            return { error: 'Permission Not Allowed' }
+            return { error: 'Not Allowed' }
         }
 
         let query = this.diaryRepository.createQueryBuilder('diary')

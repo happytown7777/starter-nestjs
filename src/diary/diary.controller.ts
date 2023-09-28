@@ -19,9 +19,9 @@ export class DiaryController {
     }
 
     @Get(':id')
-    async GetDiaryData(@Res() response, @Param('id') id: string) {
-        const diary = await this.diaryService.getDiaryData(id);
-        return response.status(HttpStatus.OK).json({ diary, });
+    async GetDiaryData(@Res() response, @Param('id') id: string, @Req() req) {
+        const res = await this.diaryService.getDiaryData(id, req.user.id);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('post')
