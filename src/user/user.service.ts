@@ -39,13 +39,6 @@ export class UserService {
         })) {
             error["email"] = "Email already exists.";
         }
-        if (await this.usersRepository.exist({
-            where: {
-                username: user.username,
-            }
-        })) {
-            error["username"] = "Username already exists.";
-        }
         if (Object.keys(error).length > 0) {
             return { error };
         }
