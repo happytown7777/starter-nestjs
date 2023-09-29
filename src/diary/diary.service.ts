@@ -126,6 +126,22 @@ export class DiaryService {
         return { error: '' }
     }
 
+    async removeDiaryComment(id, userId): Promise<{ error?: string }> {
+        let diaryComment = await this.diaryCommentRepository.findOne({
+            where: {
+                id,
+                userId,
+            }
+        });
+        if(diaryComment) {
+            await this.diaryCommentRepository.delete({ id });
+            return { error: '' }
+        }
+        else {
+            return { error: 'No matching comment. Please check details.' }
+        }
+    }
+
     async getUserDiaryList(userId, familyId, param: any = {}): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (user.familyId !== familyId) {

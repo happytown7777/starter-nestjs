@@ -54,6 +54,12 @@ export class DiaryController {
         return response.status(HttpStatus.OK).json(result);
     }
 
+    @Delete('/comment/:id')
+    async removeDiaryComment(@Param('id') id: string, @Res() response, @Req() req) {
+        const result = await this.diaryService.removeDiaryComment(id, req.user.id);
+        return response.status(HttpStatus.OK).json(result);
+    }
+
     @Post('/user/:id')
     async getUserDiary(@Param('id') id: string, @Res() response, @Req() req, @Body() body,) {
         const result = await this.diaryService.getUserDiaryList(id, req.user.family.id, body);
