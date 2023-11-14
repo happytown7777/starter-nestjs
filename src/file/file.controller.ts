@@ -17,7 +17,7 @@ export class FileController {
             destination: './public/uploads/',
             filename: editFileName,
         }),
-        fileFilter: imageFileFilter,
+        // fileFilter: imageFileFilter,
     }))
     uploadFile(@Res() response, @UploadedFile() file: Express.Multer.File) {
         return response.status(HttpStatus.OK).json({

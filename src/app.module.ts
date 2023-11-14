@@ -26,6 +26,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import EmailService from './email/email.service';
 import { SeedService } from './seed/seed.service';
 import { entities } from './db-entitles';
+import { ChatsController } from './chats/chats.controller';
+import { ChatsService } from './chats/chats.service';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -57,9 +60,10 @@ import { entities } from './db-entitles';
     NotificationModule,
     FamilyModule,
     SettingsModule,
+    ChatsModule,
   ],
-  controllers: [AppController, UserController, DiaryController, SettingsController, FileController],
-  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService],
+  controllers: [AppController, UserController, DiaryController, SettingsController, FileController, ChatsController],
+  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService, ChatsService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

@@ -9,6 +9,8 @@ import { Roles } from './user/entities/roles.entity';
 import { DiaryComment } from './diary/entities/diary-comments.entity';
 import { FamilyMoto } from './family/entities/familyMoto.entity';
 import { FamilyMotoComment } from './family/entities/familyMotoComments.entity';
+import { ChatGroup } from './chats/entities/chat-group.entity';
+import { Chat } from './chats/entities/chat.entity';
 
 export const entities = [
     User,
@@ -22,4 +24,6 @@ export const entities = [
     DiaryComment,
     FamilyMoto,
     FamilyMotoComment,
+    ChatGroup,
+    Chat,
 ]
