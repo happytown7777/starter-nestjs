@@ -19,7 +19,7 @@ export class Chat {
     type: string;
 
     @Column({ nullable: true })
-    fileName: string;
+    link: string;
 
     @Column({ name: 'is_group', default: false })
     isGroup: boolean;

@@ -13,11 +13,8 @@ import { ChatsService } from './chats.service';
 import { Injectable } from '@nestjs/common';
 import { Chat } from './entities/chat.entity';
 
-
-console.log(parseInt(process.env.CHAT_GATEWAY_PORT))
-
 @Injectable()
-@WebSocketGateway(4030, { cors: true })
+@WebSocketGateway(3000, { cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatsService) {
   }
@@ -52,10 +49,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: Chat) {
-    console.log('message', data);
     await this.chatService.sendMessage(data);
     this.emitEvents(data.fromId, 'msgSent', data);
-    this.emitEvents(data.toId, 'message', data);
+    if (data.isGroup) {
+      const users = await this.chatService.getGroupUsers(data.toId);
+      for (const user of users) {
+        if (user.id != data.fromId) {
+          this.emitEvents(user.id, 'message', data);
+        }
+      }
+    }
+    else {
+      this.emitEvents(data.toId, 'message', data);
+    }
   }
 
   // @SubscribeMessage('read')
@@ -102,10 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   emitEvents(userId, msg, obj) {
     const sockets: Socket[] = this.getSockets(userId);
 
-    console.log(this.socketMap);
-    console.log('userId', userId, sockets);
     for (const socket of sockets) {
-      console.log('socketId', socket.id);
       socket.emit(msg, obj);
     }
   }

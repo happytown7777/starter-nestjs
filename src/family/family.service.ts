@@ -22,7 +22,6 @@ export class FamilyService {
             let newUser = await this.usersRepository.findOne({ where: { id: body.id } });
             newUser.familyId = newFamily.id;
             await this.usersRepository.save(newUser);
-            console.log(newUser);
             return { user: newUser, errors: [] };
         }
         catch (e) {

@@ -77,7 +77,6 @@ export class DiaryService {
 
     async editDiary(diary, user): Promise<string> {
         try {
-            console.log(diary);
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
                 content: diary['content'],

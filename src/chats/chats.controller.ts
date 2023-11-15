@@ -19,4 +19,10 @@ export class ChatsController {
         return response.status(HttpStatus.OK).json({ channel, });
     }
 
+    @Post('/channel/create')
+    async CreateChannel(@Res() response, @Req() req, @Body() body: { name: string, members: User[], image?: string }) {
+        const res = await this.chatsService.createChannel(req.user, body);
+        return response.status(HttpStatus.OK).json(res);
+    }
+
 }

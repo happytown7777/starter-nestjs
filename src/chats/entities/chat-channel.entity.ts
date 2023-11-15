@@ -10,5 +10,6 @@ export class ChatChannel {
         public messages?: Chat[],
         public lastMessage?: Chat,
         public unReadCount: number = 0,
-    ) { }
+        public image?: string,
+        ) { }
 }

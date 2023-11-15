@@ -21,6 +21,9 @@ export class ChatGroup {
     })
     users: User[];
 
+    @Column({ nullable: true })
+    image: string;
+
     @CreateDateColumn()
     createdAt: Date;
 
