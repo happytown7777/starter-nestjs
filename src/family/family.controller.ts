@@ -86,4 +86,10 @@ export class FamilyController {
         return response.status(HttpStatus.OK).json(res);
     }
 
+    @Delete('/moto/comment/:commentId')
+    async removeDiaryComment(@Param('commentId') commentId: string, @Res() response, @Req() req) {
+        const result = await this.familyServerice.removeFamilyMotoComment(commentId, req.user.id);
+        return response.status(HttpStatus.OK).json(result);
+    }
+
 }

@@ -41,8 +41,8 @@ export class User {
     @Column({ default: 0 })
     step: number;
 
-    @Column({ nullable: true })
-    custom_name: string;
+    @Column({ nullable: true, name: 'custom_name' })
+    customName: string;
 
     @Column({ name: 'current_emotion', nullable: true })
     currentEmotion: string;

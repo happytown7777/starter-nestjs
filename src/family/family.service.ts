@@ -156,4 +156,20 @@ export class FamilyService {
         return { error: '' }
     }
 
+    async removeFamilyMotoComment(id, userId): Promise<{ error?: string }> {
+        let diaryComment = await this.familyMotoCommentRepository.findOne({
+            where: {
+                id,
+                userId,
+            }
+        });
+        if (diaryComment) {
+            await this.familyMotoCommentRepository.delete({ id });
+            return { error: '' }
+        }
+        else {
+            return { error: 'No matching comment. Please check details.' }
+        }
+    }
+
 }
