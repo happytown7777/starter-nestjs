@@ -14,7 +14,7 @@ import { Injectable } from '@nestjs/common';
 import { Chat } from './entities/chat.entity';
 
 @Injectable()
-@WebSocketGateway(3000, { cors: true })
+@WebSocketGateway(3245, { cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatsService) {
   }
