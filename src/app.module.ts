@@ -29,6 +29,9 @@ import { entities } from './db-entitles';
 import { ChatsController } from './chats/chats.controller';
 import { ChatsService } from './chats/chats.service';
 import { ChatsModule } from './chats/chats.module';
+import { CommunityController } from './community/community.controller';
+import { CommunityModule } from './community/community.module';
+import { CommunityService } from './community/community.service';
 
 @Module({
   imports: [
@@ -61,9 +64,10 @@ import { ChatsModule } from './chats/chats.module';
     FamilyModule,
     SettingsModule,
     ChatsModule,
+    CommunityModule,
   ],
-  controllers: [AppController, UserController, DiaryController, SettingsController, FileController, ChatsController],
-  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService, ChatsService],
+  controllers: [AppController, UserController, DiaryController, SettingsController, FileController, ChatsController, CommunityController],
+  providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService, ChatsService, CommunityService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

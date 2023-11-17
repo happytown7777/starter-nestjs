@@ -11,6 +11,12 @@ import { FamilyMoto } from './family/entities/familyMoto.entity';
 import { FamilyMotoComment } from './family/entities/familyMotoComments.entity';
 import { ChatGroup } from './chats/entities/chat-group.entity';
 import { Chat } from './chats/entities/chat.entity';
+import { CommunityForum } from './community/entities/community-forum.entity';
+import { CommunitySubforum } from './community/entities/community-subforum.entity';
+import { CommunityThread } from './community/entities/community-thread.entity';
+import { ThreadLike } from './community/entities/thread-like.entity';
+import { ThreadComment } from './community/entities/thread-comments.entity';
+import { ThreadView } from './community/entities/thread-view.entity';
 
 export const entities = [
     User,
@@ -26,4 +32,10 @@ export const entities = [
     FamilyMotoComment,
     ChatGroup,
     Chat,
+    CommunityForum,
+    CommunitySubforum,
+    CommunityThread,
+    ThreadLike,
+    ThreadComment,
+    ThreadView,
 ]
