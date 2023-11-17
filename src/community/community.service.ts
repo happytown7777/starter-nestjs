@@ -67,10 +67,12 @@ export class CommunityService {
             title: thread['title'],
             content: thread['content'],
             link: thread['link'],
+            filename: thread['filename'],
             user: user,
             subforum: subforum,
         }
         await this.threadRepository.save(threadBody);
+        return threadBody;
     }
 
     async likeThread(threadId, userId): Promise<void> {

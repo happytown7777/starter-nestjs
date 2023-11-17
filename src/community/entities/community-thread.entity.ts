@@ -20,6 +20,9 @@ export class CommunityThread {
     @Column({ nullable: true })
     link: string;
 
+    @Column({ nullable: true })
+    filename: string;
+
     @Column({ name: 'user_id' })
     userId: number;
 

@@ -31,8 +31,8 @@ export class CommunityController {
 
     @Post('thread/post')
     async PostThread(@Res() response, @Body() body, @Req() req) {
-        const subform = await this.communityService.postThread(body, req.user);
-        return response.status(HttpStatus.OK).json({ subform });
+        const thread = await this.communityService.postThread(body, req.user);
+        return response.status(HttpStatus.OK).json({ thread });
     }
 
     @Post('/thread/like/:id')
