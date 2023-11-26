@@ -12,13 +12,16 @@ export class Diary {
     @Column()
     date: Date;
 
+    @Column({ length: 255 })
+    title: string;
+
     @Column('longtext')
     content: string;
 
     // @Column({ length: 255 })
     // title: string;
 
-    @Column({ length: 8192 })
+    @Column({ length: 8192, nullable: true })
     imageUrl: string;
 
     @Column({ name: 'user_id' })

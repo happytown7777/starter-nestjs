@@ -28,6 +28,10 @@ export class DiaryService {
             .leftJoinAndSelect('diary.likes', 'likes')
             .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
             .where('diary.userId = :userId', { userId: userData.id });
+        if (param.searchKey) {
+            // check title or content contains searchKey
+            query = query.andWhere('(diary.title LIKE :searchKey OR diary.content LIKE :searchKey)', { searchKey: `%${param.searchKey}%` });
+        }
         if (param.withComments) {
             query = query.leftJoinAndSelect('diary.comments', 'comments').leftJoinAndSelect('comments.user', 'commentUser');
         }
@@ -60,6 +64,7 @@ export class DiaryService {
         try {
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
+                title: diary['title'],
                 content: diary['content'],
                 date: diary['date'],
                 imageUrl: diary['imageUrl'],
@@ -79,6 +84,7 @@ export class DiaryService {
         try {
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
+                title: diary['title'],
                 content: diary['content'],
                 imageUrl: diary['imageUrl'],
                 user: user,
@@ -132,7 +138,7 @@ export class DiaryService {
                 userId,
             }
         });
-        if(diaryComment) {
+        if (diaryComment) {
             await this.diaryCommentRepository.delete({ id });
             return { error: '' }
         }
