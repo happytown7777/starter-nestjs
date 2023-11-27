@@ -64,14 +64,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  // @SubscribeMessage('read')
-  // async handleRead(@ConnectedSocket() client: Socket, @MessageBody() data: {
-  //   app_id: string;
-  //   message: MessageDocument
-  // }) {
-  //   await this.messageService.readMessage(data.app_id, data.message);
-  //   this.emitEvents(data.message.fromId, 'read', data.message);
-  // }
+  @SubscribeMessage('read')
+  async handleRead(@ConnectedSocket() client: Socket, @MessageBody() data: {
+    toId: number
+    fromId: number
+    isGroup: boolean
+  }) {
+    await this.chatService.readMessage(data.toId, data.fromId, data.isGroup);
+  }
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: Socket, room: string) {

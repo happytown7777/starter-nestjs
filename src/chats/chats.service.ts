@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryTopic } from 'src/diary/entities/diary-topic.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { ChatGroup } from './entities/chat-group.entity';
 import { parse } from 'path';
 import { User } from 'src/user/entities/user.entity';
@@ -32,7 +32,6 @@ export class ChatsService {
             });
             const unReadCount = await this.chatRepository.count({
                 where: [
-                    { fromId: user.id, toId: element.id, seen: false },
                     { fromId: element.id, toId: user.id, seen: false },
                 ]
             });
@@ -52,7 +51,7 @@ export class ChatsService {
             });
             const unReadCount = await this.chatRepository.count({
                 where: [
-                    { toId: element.id, isGroup: true, seen: false },
+                    { toId: element.id, fromId: Not(user.id), isGroup: true, seen: false },
                 ]
             });
             channels.push(new ChatChannel(element.id, element.name, element.users, true, [], lastMessage, unReadCount, element.image));
@@ -107,5 +106,15 @@ export class ChatsService {
     async getGroupUsers(channelId: number): Promise<User[]> {
         const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['users'] });
         return channel.users;
+    }
+
+    async readMessage(toId: number, fromId: number, isGroup: boolean): Promise<void> {
+        console.log(toId, fromId, isGroup);
+        if (isGroup) {
+            await this.chatRepository.update({ isGroup: true, toId: fromId, fromId: Not(toId) }, { seen: true });
+        }
+        else {
+            await this.chatRepository.update({ toId, fromId }, { seen: true });
+        }
     }
 }
