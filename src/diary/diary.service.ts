@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryTopic } from 'src/diary/entities/diary-topic.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Diary } from './entities/diary.entity';
 import { parse } from 'path';
 import { DiaryLike } from './entities/diary-like.entity';
 import { DiaryComment } from './entities/diary-comments.entity';
 import { User } from 'src/user/entities/user.entity';
+import { SocketGateway } from 'src/socket/socket.gateway';
+import { NotificationEntity } from 'src/notification/entities/notification.entity';
+import { Settings } from 'src/settings/entities/settings.entity';
 
 @Injectable()
 export class DiaryService {
@@ -16,6 +19,9 @@ export class DiaryService {
         @InjectRepository(DiaryLike) private diaryLikeRepository: Repository<DiaryLike>,
         @InjectRepository(Diary) private diaryRepository: Repository<Diary>,
         @InjectRepository(DiaryComment) private diaryCommentRepository: Repository<DiaryComment>,
+        @InjectRepository(NotificationEntity) private notificationRepository: Repository<NotificationEntity>,
+        @InjectRepository(Settings) private settingsRepository: Repository<Settings>,
+        private socketGateway: SocketGateway,
     ) { }
 
     async getAllTopics(): Promise<DiaryTopic[]> {
@@ -31,6 +37,9 @@ export class DiaryService {
         if (param.searchKey) {
             // check title or content contains searchKey
             query = query.andWhere('(diary.title LIKE :searchKey OR diary.content LIKE :searchKey)', { searchKey: `%${param.searchKey}%` });
+        }
+        if (param.startDate && param.endDate) {
+            query = query.andWhere('diary.date BETWEEN :startDate AND :endDate', { startDate: param.startDate, endDate: param.endDate });
         }
         if (param.withComments) {
             query = query.leftJoinAndSelect('diary.comments', 'comments').leftJoinAndSelect('comments.user', 'commentUser');
@@ -74,6 +83,24 @@ export class DiaryService {
             if (topic) {
                 this.diaryRepository.save(diaryBody);
             }
+            const familyMemebers = await this.userRepository.find({ where: { familyId: user.familyId, id: Not(user.id) } });
+            familyMemebers.forEach(async member => {
+                const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
+                console.log(settings, member)
+                if(settings?.allow_notification && settings?.allow_family_notification) {
+                    this.notificationRepository.save({
+                        userId: member.id,
+                        type: 'diary',
+                        title: `${user.customName ?? user.firstName} posted new diary`,
+                        content: `${user.customName ?? user.firstName} added new diary <b>${diary.title}</b>`,
+                        url: `/diary/view/${diary.id}`,
+                    });
+                    this.socketGateway.emitEvents(member.id.toString(), 'notification', {
+                        title: `${user.customName ?? user.firstName} added new diary`,
+                        content: `${user.customName ?? user.firstName} added new diary ${diary.title}`
+                    });
+                }
+            });
             return;
         } catch (err) {
             return err.message;
@@ -128,6 +155,23 @@ export class DiaryService {
             parentId,
             comment,
         });
+        const diary = await this.diaryRepository.findOne({ where: { id } });
+        if (diary.userId.toString() !== userId.toString()) {
+            const settings = await this.settingsRepository.findOne({ where: { userId: diary.userId } });
+            if (settings?.allow_notification && settings?.allow_message_notification) {
+                await this.notificationRepository.save({
+                    userId: diary.userId,
+                    type: 'comment',
+                    title: `Commented to your diary`,
+                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
+                    url: `/diary/view/${diary.id}`,
+                });
+                this.socketGateway.emitEvents(diary.userId.toString(), 'notification', {
+                    title: `${diary.user.customName ?? diary.user.firstName} commented on your diary`,
+                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
+                });
+            }
+        }
         return { error: '' }
     }
 

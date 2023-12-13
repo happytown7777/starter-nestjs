@@ -97,19 +97,22 @@ export class ChatsService {
         return { success: true };
     }
 
-    async sendMessage(msg: Chat): Promise<Boolean> {
+    async sendMessage(msg: Chat): Promise<any> {
         const message = await this.chatRepository.create(msg);
-        await this.chatRepository.save(message);
-        return true;
+        await this.chatRepository.save(message);        
+        return {
+            ...message,
+            from: await this.userRepository.findOne({ where: { id: msg.fromId } }),
+            to: await this.userRepository.findOne({ where: { id: msg.toId } }),
+        };
     }
 
     async getGroupUsers(channelId: number): Promise<User[]> {
         const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['users'] });
-        return channel.users;
+        return channel.users.filter(user => user.id != channel.id);
     }
 
     async readMessage(toId: number, fromId: number, isGroup: boolean): Promise<void> {
-        console.log(toId, fromId, isGroup);
         if (isGroup) {
             await this.chatRepository.update({ isGroup: true, toId: fromId, fromId: Not(toId) }, { seen: true });
         }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CommunityForum } from './entities/community-forum.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { CommunitySubforum } from './entities/community-subforum.entity';
 import { CommunityThread } from './entities/community-thread.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -20,8 +20,8 @@ export class CommunityService {
         @InjectRepository(ThreadView) private threadViewRepository: Repository<ThreadView>,
     ) { }
 
-    async getForumList(forum_id?: string): Promise<CommunityForum[]> {
-        return await this.forumRepository.find(forum_id ? { where: { id: parseInt(forum_id) }, relations: ['subforums'] } : { relations: ['subforums'] });
+    async getForumList(forum_id?: string[]): Promise<CommunityForum[]> {
+        return await this.forumRepository.find(forum_id.length ? { where: { id: In(forum_id) }, relations: ['subforums'] } : { relations: ['subforums'] });
     }
 
     async searchThreads(searchKey?: string): Promise<CommunityThread[]> {

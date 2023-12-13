@@ -79,7 +79,7 @@ export class UserService {
                 const payload = { email: foundUser.email, firstName: foundUser.firstName, lastName: foundUser.lastName, avatar: foundUser.avatar };
                 return {
                     accessToken: jwt.sign(payload, {
-                        expiresIn: "24h"
+                        expiresIn: "240h"
                     }),
                     user: foundUser,
                 };

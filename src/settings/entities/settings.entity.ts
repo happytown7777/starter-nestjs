@@ -9,6 +9,18 @@ export class Settings {
     @Column({ default: false })
     allow_parental_control: boolean;
 
+    @Column({ default: true })
+    allow_notification: boolean;
+
+    @Column({ default: true })
+    allow_reminder: boolean;
+
+    @Column({ default: true })
+    allow_family_notification: boolean;
+
+    @Column({ default: true })
+    allow_message_notification: boolean;
+
     @Column({ name: 'user_id' })
     userId: number;
 

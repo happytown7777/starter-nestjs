@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DiaryModule } from './diary/diary.module';
@@ -32,10 +33,12 @@ import { ChatsModule } from './chats/chats.module';
 import { CommunityController } from './community/community.controller';
 import { CommunityModule } from './community/community.module';
 import { CommunityService } from './community/community.service';
+import { ReminderModule } from './reminder/reminder.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOSTNAME,
@@ -65,6 +68,7 @@ import { CommunityService } from './community/community.service';
     SettingsModule,
     ChatsModule,
     CommunityModule,
+    ReminderModule,
   ],
   controllers: [AppController, UserController, DiaryController, SettingsController, FileController, ChatsController, CommunityController],
   providers: [AppService, UserService, DiaryService, SettingsService, FileService, EmailService, SeedService, ChatsService, CommunityService],

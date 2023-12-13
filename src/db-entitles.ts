@@ -17,6 +17,7 @@ import { CommunityThread } from './community/entities/community-thread.entity';
 import { ThreadLike } from './community/entities/thread-like.entity';
 import { ThreadComment } from './community/entities/thread-comments.entity';
 import { ThreadView } from './community/entities/thread-view.entity';
+import { NotificationEntity } from './notification/entities/notification.entity';
 
 export const entities = [
     User,
@@ -38,4 +39,5 @@ export const entities = [
     ThreadLike,
     ThreadComment,
     ThreadView,
+    NotificationEntity,
 ]
