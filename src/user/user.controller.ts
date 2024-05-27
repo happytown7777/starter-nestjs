@@ -61,10 +61,16 @@ export class UserController {
         return response.status(HttpStatus.OK).json(res)
     }
 
-    @Post('/check-guardian')
-    async CheckGuardian(@Res() response, @Body() body) {
-        const res = await this.userServerice.checkGuardian(body);
+    @Post('/check-family')
+    async CheckFamily(@Res() response, @Body() body) {
+        const res = await this.userServerice.checkFamily(body);
         return response.status(HttpStatus.OK).json(res)
+    }
+
+    @Post('/check-pin')
+    async CheckPin(@Res() response, @Body() body) {
+        const res = await this.userServerice.checkPin(body);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Get('/setting')
@@ -75,6 +81,7 @@ export class UserController {
 
     @Get('/profile/me')
     async GetMyProfile(@Res() response, @Req() req) {
+        console.log("===profile_me:", req.user)
         const newUSer = await this.userServerice.getOne(req.user.email);
         return response.status(HttpStatus.OK).json(newUSer);
     }

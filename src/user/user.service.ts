@@ -31,6 +31,7 @@ export class UserService {
     ) { }
 
     async signup(user): Promise<any> {
+        console.log("======signUp_user=====", user);
         let error = {};
         if (await this.usersRepository.exist({
             where: {
@@ -47,9 +48,9 @@ export class UserService {
         const isGuardian = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
         const userRole = await this.rolesRepository.findOne({ where: { role: !isGuardian ? 'Child' : 'Parent' } });
 
-        if (!user.family_id && user.familyName) {
+        if (!user.familyId && user.familyName) {
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
-            user.family_id = newFamily.id;
+            user.familyId = newFamily.id;
         }
 
         const reqBody = {
@@ -62,7 +63,7 @@ export class UserService {
             email: user.email,
             password: hash,
             emailVeiified: true,
-            familyId: user.family_id,
+            familyId: user.familyId,
             roleId: userRole.id,
         }
         const newUser = await this.usersRepository.save(reqBody);
@@ -199,10 +200,13 @@ export class UserService {
         return body;
     }
 
-    async checkGuardian(body): Promise<any> {
-        const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
-        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
-        if (newUser) {
+    async checkFamily(body): Promise<any> {
+        console.log("=====checkFamily:", body);
+        // const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
+        const foundFamily = await this.familyRepository.findOne({ where: {name: body.findFamilyName} });
+        console.log("=====foundFamily:", foundFamily);
+        // const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
+        if (foundFamily) {
             // const age = moment().diff(newUser.birthdate, 'years');
             // if (age > 16) {
             //     return { guardianId: newUser.id };
@@ -210,11 +214,25 @@ export class UserService {
             // else {
             //     return { error: "This account is not old enough to be a guardian." };
             // }
-            console.log(newUser)
-            return { guardianId: newUser.id, family: newUser.family };
+            console.log(foundFamily)
+            return { family: foundFamily };
         }
         else {
-            return { error: "No matching Guardian account. Please check details." };
+            return { error: "No matching Family account. Please check details." };
+        }
+    }
+
+    async checkPin(body): Promise<any> {
+        console.log("=====checkPin:", body);
+        // const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
+        const foundFamily = await this.familyRepository.findOne({ where: {pin: body.findFamilyPin} });
+        console.log("=====foundFamily:", foundFamily);
+        if (foundFamily) {
+            console.log(foundFamily)
+            return { family: foundFamily };
+        }
+        else {
+            return { error: "No matching Family account. Please check details." };
         }
     }
 

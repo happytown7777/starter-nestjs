@@ -21,6 +21,9 @@ export class Family {
     @Column({ length: 1024, nullable: true })
     imgUrl: string;
 
+    @Column()
+    pin: string;
+    
     @CreateDateColumn()
     createdAt: Date;
 
