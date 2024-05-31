@@ -13,6 +13,8 @@ import { resetPasswordTemplate } from 'src/email/templates/reset-password.templa
 import { UserEmotions } from './entities/userEmotions.entity';
 import { Roles } from './entities/roles.entity';
 import { familyInviteTemplate } from 'src/email/templates/family-invite.template';
+import * as Jimp from 'jimp';
+import * as QrCode from 'qrcode-reader';
 
 const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -203,8 +205,7 @@ export class UserService {
     async checkFamily(body): Promise<any> {
         console.log("=====checkFamily:", body);
         // const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
-        const foundFamily = await this.familyRepository.findOne({ where: {name: body.findFamilyName} });
-        console.log("=====foundFamily:", foundFamily);
+        const foundFamily = await this.familyRepository.findOne({ where: { name: body.findFamilyName } });
         // const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
         if (foundFamily) {
             // const age = moment().diff(newUser.birthdate, 'years');
@@ -218,21 +219,38 @@ export class UserService {
             return { family: foundFamily };
         }
         else {
-            return { error: "No matching Family account. Please check details." };
+            return { error: "No matching Family account." };
         }
     }
 
     async checkPin(body): Promise<any> {
-        console.log("=====checkPin:", body);
-        // const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
-        const foundFamily = await this.familyRepository.findOne({ where: {pin: body.findFamilyPin} });
-        console.log("=====foundFamily:", foundFamily);
+        const foundFamily = await this.familyRepository.findOne({ where: { pin: body.findFamilyPin } });
         if (foundFamily) {
             console.log(foundFamily)
             return { family: foundFamily };
         }
         else {
-            return { error: "No matching Family account. Please check details." };
+            return { error: "No matching Family account." };
+        }
+    }
+
+    async qrcode(fileBuffer: Buffer): Promise<any> {
+        try {
+            const image = await Jimp.read(fileBuffer);
+            const qr = new QrCode();
+            return new Promise((resolve, reject) => {
+                qr.callback = (err, value) => {
+                    if (err) {
+                        resolve({ error: 'Error decoding QR code' });
+                    } else {
+                        resolve({ qrcode: value?.result });
+                    }
+                };
+                qr.decode(image.bitmap);
+            })
+
+        } catch (error) {
+            return { error: 'Error reading image' };
         }
     }
 

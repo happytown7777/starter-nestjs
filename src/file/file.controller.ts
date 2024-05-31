@@ -20,6 +20,7 @@ export class FileController {
         // fileFilter: imageFileFilter,
     }))
     uploadFile(@Res() response, @UploadedFile() file: Express.Multer.File) {
+        console.log("=======response:", response);
         return response.status(HttpStatus.OK).json({
             url: file.path.replace(/public/, ''),
         })

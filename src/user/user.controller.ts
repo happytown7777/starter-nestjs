@@ -1,9 +1,12 @@
 
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UploadedFiles, Put, Req, Res, UseInterceptors, UploadedFile } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UploadedFile, Put, Req, Res, UseInterceptors } from "@nestjs/common";
 import { User } from "./entities/user.entity";
 import { UserService } from "./user.service";
 import { JwtService } from '@nestjs/jwt'
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express/multer";
+import { diskStorage } from 'multer';
+import { editFileName } from "src/file/utils/file-upload.utils";
+import * as multer from 'multer';
 
 @Controller('/auth')
 export class UserController {
@@ -23,6 +26,15 @@ export class UserController {
     async SignIn(@Res() response, @Body() user: User) {
         const token = await this.userServerice.signin(user, this.jwtService);
         return response.status(HttpStatus.OK).json(token)
+    }
+
+    @Post('/qrcode')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: multer.memoryStorage(),
+    }))
+    async QrCode(@Res() response, @UploadedFile() file: Express.Multer.File) {
+        const res = await this.userServerice.qrcode(file?.buffer);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('/reset-password')

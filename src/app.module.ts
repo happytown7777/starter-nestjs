@@ -85,9 +85,11 @@ export class AppModule {
           { path: '/auth/verify-password-token', method: RequestMethod.POST },
           { path: '/auth/change-password', method: RequestMethod.POST },
           { path: '/auth/check-family', method: RequestMethod.POST },
-          { path: '/auth/check-pin', method: RequestMethod.POST},
+          { path: '/auth/check-pin', method: RequestMethod.POST },
           { path: '/auth/signup', method: RequestMethod.POST },
+          { path: '/auth/qrcode', method: RequestMethod.POST },
           { path: '/diary/topics', method: RequestMethod.GET },
+          { path: '/file/upload', method: RequestMethod.POST },
           { path: '/uploads/(.*)', method: RequestMethod.GET },
         ]
       )
