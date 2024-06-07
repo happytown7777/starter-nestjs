@@ -26,17 +26,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     [key: string]: Socket[];
   } = {};
 
-  // constructor(private readonly jwtService: JwtService) {}
-
   async handleConnection(client: Socket) {
     try {
       const query: any = client.handshake.query;
-      // const payload = this.jwtService.verify(token);
       this.addSocket(query.user_id, client);
-      // process.nextTick(async () => {
-      //   const messages = await this.messageService.getMessages(query['app_id'], query.user_id);
-      //   client.emit("allChats", messages);
-      // })
     } catch (error) {
       client.disconnect(true);
     }

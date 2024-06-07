@@ -10,6 +10,7 @@ import { DiaryComment } from './diary/entities/diary-comments.entity';
 import { FamilyMoto } from './family/entities/familyMoto.entity';
 import { FamilyMotoComment } from './family/entities/familyMotoComments.entity';
 import { ChatGroup } from './chats/entities/chat-group.entity';
+import { ChatGroupUser } from './chats/entities/chat-group-user.entity';
 import { Chat } from './chats/entities/chat.entity';
 import { CommunityForum } from './community/entities/community-forum.entity';
 import { CommunitySubforum } from './community/entities/community-subforum.entity';
@@ -32,6 +33,7 @@ export const entities = [
     FamilyMoto,
     FamilyMotoComment,
     ChatGroup,
+    ChatGroupUser,
     Chat,
     CommunityForum,
     CommunitySubforum,

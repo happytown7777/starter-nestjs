@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { ChatChannel } from './entities/chat-channel.entity';
 import { User } from 'src/user/entities/user.entity';
+import { response } from 'express';
 
 @Controller('chats')
 export class ChatsController {
@@ -24,5 +25,19 @@ export class ChatsController {
         const res = await this.chatsService.createChannel(req.user, body);
         return response.status(HttpStatus.OK).json(res);
     }
+
+    @Delete('/channel/delete/:id')
+    async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
+        const result = await this.chatsService.deleteChannel(id, req.user.id);
+        return response.status(HttpStatus.OK).json(result)
+    }
+
+    @Put('/channel/setting')
+    async SettingChannel(@Req() req, @Res() response, @Body() body: { id: number, key: string, value: boolean }) {
+        const result = await this.chatsService.settingChannel(req.user.id, body)
+        return response.status(HttpStatus.OK).json(result);
+    }
+
+
 
 }
