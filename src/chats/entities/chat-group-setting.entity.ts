@@ -10,16 +10,16 @@ export class ChatGroupUser {
   @Column({name: 'chat_group_id'})
   chatGroupId: number;
 
-  @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUsers)
-  @JoinColumn({name: 'chat_group_id' })
-  chatGroup: ChatGroup;
+  // @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUsers)
+  // @JoinColumn({name: 'chat_group_id' })
+  // chatGroup: ChatGroup;
 
-  @Column({name: 'user_id'})
-  userId: number;
+  // @Column({name: 'user_id'})
+  // userId: number;
 
-  @ManyToOne(() => User, user => user.chatGroupUsers)
-  @JoinColumn({name: 'user_id'})
-  user: User;
+  // @ManyToOne(() => User, user => user.chatGroupUsers)
+  // @JoinColumn({name: 'user_id'})
+  // user: User;
 
   @Column({name: 'is_pin', default: false})
   isPin: boolean;

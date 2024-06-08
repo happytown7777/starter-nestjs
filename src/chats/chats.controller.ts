@@ -26,18 +26,15 @@ export class ChatsController {
         return response.status(HttpStatus.OK).json(res);
     }
 
-    @Delete('/channel/delete/:id')
-    async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
-        const result = await this.chatsService.deleteChannel(id, req.user.id);
-        return response.status(HttpStatus.OK).json(result)
-    }
+    // @Delete('/channel/delete/:id')
+    // async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
+    //     const result = await this.chatsService.deleteChannel(id, req.user.id);
+    //     return response.status(HttpStatus.OK).json(result)
+    // }
 
-    @Put('/channel/setting')
-    async SettingChannel(@Req() req, @Res() response, @Body() body: { id: number, key: string, value: boolean }) {
-        const result = await this.chatsService.settingChannel(req.user.id, body)
-        return response.status(HttpStatus.OK).json(result);
-    }
-
-
-
+    // @Put('/channel/setting')
+    // async SettingChannel(@Req() req, @Res() response, @Body() body: { id: number, key: string, value: boolean }) {
+    //     const result = await this.chatsService.settingChannel(req.user.id, body)
+    //     return response.status(HttpStatus.OK).json(result);
+    // }
 }
