@@ -1,5 +1,6 @@
 import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from "typeorm";
-import { User } from "../../user/entities/user.entity";
+
+import { ChatGroupUser } from "./chat_group_user.entity";
 
 @Entity()
 export class ChatGroup {
@@ -9,17 +10,20 @@ export class ChatGroup {
     @Column({ length: 50 })
     name: string;
 
-    @ManyToMany(() => User)
-    @JoinTable({
-        name: 'chat_group_user', joinColumn: {
-            name: 'chat_group_id',
-            referencedColumnName: 'id',
-        }, inverseJoinColumn: {
-            name: 'user_id',
-            referencedColumnName: 'id',
-        }
-    })
-    users: User[];
+    @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.chatGroup)
+    chatGroupUser: ChatGroupUser[];
+    
+    // @ManyToMany(() => User)
+    // @JoinTable({
+    //     name: 'chat_group_user', joinColumn: {
+    //         name: 'chat_group_id',
+    //         referencedColumnName: 'id',
+    //     }, inverseJoinColumn: {
+    //         name: 'user_id',
+    //         referencedColumnName: 'id',
+    //     }
+    // })
+    // users: User[];
 
     @Column({ nullable: true })
     image: string;

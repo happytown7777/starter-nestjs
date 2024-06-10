@@ -26,11 +26,23 @@ export class ChatsController {
         return response.status(HttpStatus.OK).json(res);
     }
 
-    // @Delete('/channel/delete/:id')
-    // async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
-    //     const result = await this.chatsService.deleteChannel(id, req.user.id);
-    //     return response.status(HttpStatus.OK).json(result)
-    // }
+    @Delete('/channel/delete/:id')
+    async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
+        const result = await this.chatsService.deleteChannel(id, req.user.id);
+        return response.status(HttpStatus.OK).json(result)
+    }
+
+    @Post('/channel/pin')
+    async ChangePin(@Res() response, @Req() req, @Body() body: { relatedId: number, isGroup: boolean }) {
+        const result = await this.chatsService.setPinChannel(req.user.id, body.relatedId, body.isGroup);
+        return response.status(HttpStatus.OK).json(result)
+    }
+
+    @Post('/channel/mute')
+    async ChangeMute(@Res() response, @Req() req, @Body() body: { relatedId: number, isGroup: boolean }) {
+        const result = await this.chatsService.setMuteChannel(req.user.id, body.relatedId, body.isGroup);
+        return response.status(HttpStatus.OK).json(result)
+    }
 
     // @Put('/channel/setting')
     // async SettingChannel(@Req() req, @Res() response, @Body() body: { id: number, key: string, value: boolean }) {

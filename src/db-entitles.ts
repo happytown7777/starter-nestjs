@@ -18,6 +18,8 @@ import { ThreadLike } from './community/entities/thread-like.entity';
 import { ThreadComment } from './community/entities/thread-comments.entity';
 import { ThreadView } from './community/entities/thread-view.entity';
 import { NotificationEntity } from './notification/entities/notification.entity';
+import { ChatGroupUser } from './chats/entities/chat_group_user.entity';
+import { ChatSetting } from './chats/entities/chat-setting.entity';
 
 export const entities = [
     User,
@@ -33,6 +35,8 @@ export const entities = [
     FamilyMotoComment,
     ChatGroup,
     Chat,
+    ChatGroupUser,
+    ChatSetting,
     CommunityForum,
     CommunitySubforum,
     CommunityThread,

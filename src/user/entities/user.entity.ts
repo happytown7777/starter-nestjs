@@ -2,6 +2,7 @@ import { Family } from "src/family/entities/family.entity";
 import { Settings } from "src/settings/entities/settings.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Roles } from "./roles.entity";
+import { ChatGroupUser } from "src/chats/entities/chat_group_user.entity";
 
 @Entity()
 export class User {
@@ -71,7 +72,9 @@ export class User {
     @ManyToOne(() => User, { nullable: true, eager: false })
     @JoinColumn({ name: 'guardian_id' })
     gurdian: User | null;
-
+    
+    @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.user)
+    chatGroupUser: ChatGroupUser[];
     // @OneToMany(() => User, (user) => user.gurdian)
     // @JoinColumn({ name: 'guardianId' })
     // children: User[];

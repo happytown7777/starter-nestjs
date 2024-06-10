@@ -7,16 +7,24 @@ import { parse } from 'path';
 import { User } from 'src/user/entities/user.entity';
 import { ChatChannel } from './entities/chat-channel.entity';
 import { Chat } from './entities/chat.entity';
-// import { ChatGroupUser } from './entities/chat-group-setting.entity';
+import { ChatGroupUser } from './entities/chat_group_user.entity';
+import { ChatSetting } from './entities/chat-setting.entity';
+
 
 @Injectable()
 export class ChatsService {
     constructor(
         @InjectRepository(Chat) private chatRepository: Repository<Chat>,
         @InjectRepository(ChatGroup) private chatGroupRepository: Repository<ChatGroup>,
-        // @InjectRepository(ChatGroupUser) private chatGroupUserRepository: Repository<ChatGroupUser>,
+        @InjectRepository(ChatGroupUser) private chatGroupUserRepository: Repository<ChatGroupUser>,
         @InjectRepository(User) private userRepository: Repository<User>,
+        @InjectRepository(ChatSetting) private chatSettingRepository: Repository<ChatSetting>,
     ) { }
+
+    async doesRecordExist(repository, conditions): Promise<boolean> {
+        const record = await repository.findOne({ where: conditions });
+        return record !== null;
+    }
 
     async getAllChannels(auth_user: User): Promise<ChatChannel[]> {
         const user = await this.userRepository.findOne({ where: { email: auth_user.email }, relations: ['family'] })
@@ -37,14 +45,21 @@ export class ChatsService {
                     { fromId: element.id, toId: user.id, seen: false },
                 ]
             });
-            channels.push(new ChatChannel(element.id, element.fullName, [element], false, [], lastMessage, unReadCount));
+            console.log("----------unReadCount-------------", element.id, user.id, unReadCount)
+
+            const pin = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: element.id, isGroup: false, type: 'pin' });
+            const mute = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: element.id, isGroup: false, type: 'mute' });
+            channels.push(new ChatChannel(element.id, element.fullName, [element], false, [], lastMessage, unReadCount, element.avatar, pin, mute));
         }
         const groups = await this.chatGroupRepository.createQueryBuilder("chat_group")
-            .innerJoinAndSelect("chat_group.users", "user")
+            .innerJoinAndSelect("chat_group.chatGroupUser", "cgu")
+            .innerJoinAndSelect("cgu.user", "user")
             .where("user.id = :userId", { userId: user.id })
             .getMany();
         for (let i = 0; i < groups.length; i++) {
-            const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id }, relations: ['users'] });
+            console.log("------------groups id----------", groups[i].id);
+            const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
+            const users = element.chatGroupUser.map(cgu => cgu.user);
             const lastMessage = await this.chatRepository.findOne({
                 where: [
                     { toId: element.id, isGroup: true },
@@ -56,21 +71,28 @@ export class ChatsService {
                     { toId: element.id, fromId: Not(user.id), isGroup: true, seen: false },
                 ]
             });
-            channels.push(new ChatChannel(element.id, element.name, element.users, true, [], lastMessage, unReadCount, element.image));
+            console.log("----------unReadCount-------------", unReadCount)
+            const pin = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: groups[i].id, isGroup: true, type: 'pin' });
+            const mute = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: groups[i].id, isGroup: true, type: 'mute' });
+            console.log("----------pin, mute-------------", pin, mute)
+            channels.push(new ChatChannel(element.id, element.name, users, true, [], lastMessage, unReadCount, element.image, pin, mute));
         }
+
+
         return channels.sort((a, b) => (!a.lastMessage?.createdAt || a.lastMessage?.createdAt < b.lastMessage?.createdAt) ? 1 : -1);
     }
 
     async getChannelInfo(auth_user: User, chatId: string, isGroup: Boolean): Promise<ChatChannel> {
         if (isGroup) {
-            const group = await this.chatGroupRepository.findOne({ where: { id: parseInt(chatId) }, relations: ['users'] })
+            const group = await this.chatGroupRepository.findOne({ where: { id: parseInt(chatId) }, relations: ['chatGroupUser', 'chatGroupUser.user'] })
+            const users = group.chatGroupUser.map(cgu => cgu.user);
             const messages = await this.chatRepository.find({
                 where: [
                     { toId: group.id, isGroup: true },
                 ],
                 order: { createdAt: 'ASC' },
             })
-            return new ChatChannel(group.id, group.name, group.users, true, messages, undefined, 0, group.image);
+            return new ChatChannel(group.id, group.name, users, true, messages, undefined, 0, group.image);
         }
         else {
             const member = await this.userRepository.findOne({ where: { id: parseInt(chatId) }, relations: ['family'] })
@@ -91,45 +113,57 @@ export class ChatsService {
         if (exsitsName) return { success: false, error: 'Group subject already exists' };
         const newGroup = await this.chatGroupRepository.create({
             name: body.name,
-            users: body.members,
             image: body.image,
         });
-        newGroup.users.push(auth_user);
-        await this.chatGroupRepository.save(newGroup);
+        const savedGroup = await this.chatGroupRepository.save(newGroup);
+        const chatGroupUsers = body.members.map(member => {
+            return this.chatGroupUserRepository.create({
+                user: member,
+                chatGroup: savedGroup,
+            })
+        })
+        chatGroupUsers.push(this.chatGroupUserRepository.create({
+            user: auth_user,
+            chatGroup: savedGroup,
+        }))
+        await this.chatGroupUserRepository.save(chatGroupUsers)
         return { success: true };
     }
 
-    // async deleteChannel(id: number, userId: number): Promise<{ error?: string }> {
-    //     const exist = await this.chatGroupUserRepository.findOne({ where: { chatGroupId: id, userId: userId } });
-    //     if (exist) {
-    //         await this.chatGroupUserRepository.delete({ chatGroupId: id, userId: userId });
-    //         return {};
-    //     }
-    //     else {
-    //         return { error: "No matching user channel" };
-    //     }
-    // }
+    async deleteChannel(id: number, userId: number): Promise<{ error?: string }> {
+        const exist = await this.chatGroupUserRepository.findOne({ where: { chatGroupId: id, userId: userId } });
+        if (exist) {
+            await this.chatGroupUserRepository.delete({ chatGroupId: id, userId: userId });
+            return {};
+        }
+        else {
+            return { error: "No matching user channel" };
+        }
+    }
 
-    // async settingChannel(userId: number, body: {id: number, key: string, value: boolean }): Promise<any> {
-    //     const exist = await this.chatGroupUserRepository.findOne({ where: { chatGroupId: body.id, userId: userId } })
+    async setPinChannel(userId: number, relatedId: number, isGroup: boolean): Promise<{ error?: string }> {
+        const exist = await this.chatSettingRepository.findOne({ where: { userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'pin' } });
+        if (exist) {
+            await this.chatSettingRepository.delete({ userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'pin' });
+            return {};
+        }
+        else {
+            const saveData = this.chatSettingRepository.create({ userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'pin' });
+            await this.chatSettingRepository.save(saveData);
+        }
+    }
 
-    //     if (!exist) {
-    //         return { error: 'No matching user channel' };
-    //     }
-
-    //     if (body.key === 'isPin') {
-    //         exist.isPin = body.value;
-    //     } else if (body.key === 'isMute') {
-    //         exist.isMute = body.value;
-    //     } else {
-    //         return { error: 'Invalid Key' };
-    //     }
-    //     //Save the updated record
-    //     await this.chatGroupUserRepository.save(exist);
-    //     return {};
-
-    // }
-
+    async setMuteChannel(userId: number, relatedId: number, isGroup: boolean): Promise<{ error?: string }> {
+        const exist = await this.chatSettingRepository.findOne({ where: { userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'mute' } });
+        if (exist) {
+            await this.chatSettingRepository.delete({ userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'mute' });
+            return {};
+        }
+        else {
+            const saveData = this.chatSettingRepository.create({ userId: userId, relatedId: relatedId, isGroup: isGroup, type: 'mute' });
+            await this.chatSettingRepository.save(saveData);
+        }
+    }
 
     async sendMessage(msg: Chat): Promise<any> {
         const message = await this.chatRepository.create(msg);
@@ -142,8 +176,9 @@ export class ChatsService {
     }
 
     async getGroupUsers(channelId: number): Promise<User[]> {
-        const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['users'] });
-        return channel.users.filter(user => user.id != channel.id);
+        const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
+        const users = channel.chatGroupUser.map(cgu => cgu.user);
+        return users.filter(user => user.id != channel.id);
     }
 
     async readMessage(toId: number, fromId: number, isGroup: boolean): Promise<void> {

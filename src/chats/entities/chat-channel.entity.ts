@@ -11,5 +11,7 @@ export class ChatChannel {
         public lastMessage?: Chat,
         public unReadCount: number = 0,
         public image?: string,
+        public pin?: boolean,
+        public mute?: boolean,
         ) { }
 }
