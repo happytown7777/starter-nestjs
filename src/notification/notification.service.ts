@@ -12,17 +12,17 @@ export class NotificationService {
     ) { }
 
     async getUnReadNotifications(userId: number): Promise<NotificationEntity[]> {
-        return await this.notificationRepository.find({ where: { userId, isRead: false } });
+        return await this.notificationRepository.find({ where: { toId: userId, isRead: false }, relations: ['fromUser'], order: { createdAt: 'DESC' } });
     }
 
     async setReadNotification(id: number, userId: number): Promise<void> {
-        await this.notificationRepository.update({ id, userId }, { isRead: true });
-        this.socketGateway.emitEvents(userId, 'notification-update', { });
+        await this.notificationRepository.update({ id: id, toId: userId }, { isRead: true });
+        this.socketGateway.emitEvents(userId, 'notification-update', {});
     }
 
     async setReadAllNotifications(userId: number): Promise<void> {
-        await this.notificationRepository.update({ userId }, { isRead: true });
-        this.socketGateway.emitEvents(userId, 'notification-update', { });
+        await this.notificationRepository.update({ toId: userId }, { isRead: true });
+        this.socketGateway.emitEvents(userId, 'notification-update', {});
     }
 
 }

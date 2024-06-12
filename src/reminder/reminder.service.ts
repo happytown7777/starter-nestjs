@@ -28,8 +28,9 @@ export class ReminderService {
                 const todayDiary = await this.diaryRepository.count({ where: { userId: settings[i].userId, date: new Date() } });
                 if (todayDiary == 0) {
                     await this.notificationRepository.save({
-                        userId: settings[i].userId,
-                        type: 'reminder',
+                        fromId: settings[i].userId,
+                        toId: settings[i].userId,
+                        type: 'comment',
                         content: 'Just a friendly reminder to capture your thoughts and experiences in your diary today. Your insights are valuable!',
                         url: '/dashboard?post=true',
                     });
