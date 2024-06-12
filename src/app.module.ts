@@ -87,6 +87,7 @@ export class AppModule {
           { path: '/auth/check-family', method: RequestMethod.POST },
           { path: '/auth/check-pin', method: RequestMethod.POST},
           { path: '/auth/signup', method: RequestMethod.POST },
+          { path: '/auth/qrcode', method: RequestMethod.POST },
           { path: '/file/upload', method: RequestMethod.POST },
           { path: '/diary/topics', method: RequestMethod.GET },
           { path: '/uploads/(.*)', method: RequestMethod.GET },
