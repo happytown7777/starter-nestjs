@@ -69,7 +69,7 @@ export class UserService {
             roleId: userRole.id,
         }
         const newUser = await this.usersRepository.save(reqBody);
-        await this.settingsRepository.upsert({ userId: newUser.id, allow_parental_control: user.allowParental, }, ['userId']);
+        await this.settingsRepository.upsert({ userId: newUser.id, allowParentalControl: user.allowParental, }, ['userId']);
         return { user: newUser };
     }
 

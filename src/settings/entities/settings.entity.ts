@@ -7,19 +7,19 @@ export class Settings {
     id: number;
 
     @Column({ default: false })
-    allow_parental_control: boolean;
+    allowParentalControl: boolean;
 
     @Column({ default: true })
-    allow_notification: boolean;
+    allowEveryonePost: boolean;
 
     @Column({ default: true })
-    allow_reminder: boolean;
+    allowReminder: boolean;
 
     @Column({ default: true })
-    allow_family_notification: boolean;
+    allowFamilyNotification: boolean;
 
     @Column({ default: true })
-    allow_message_notification: boolean;
+    allowMessageNotification: boolean;
 
     @Column({ name: 'user_id' })
     userId: number;
