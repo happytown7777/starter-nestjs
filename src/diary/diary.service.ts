@@ -87,7 +87,7 @@ export class DiaryService {
             familyMemebers.forEach(async member => {
                 const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
                 console.log(settings, member)
-                if(settings?.allowEveryonePost && settings?.allowFamilyNotification) {
+                if(settings?.allow_everyone_post && settings?.allow_family_notification) {
                     this.notificationRepository.save({
                         userId: member.id,
                         type: 'diary',
@@ -158,7 +158,7 @@ export class DiaryService {
         const diary = await this.diaryRepository.findOne({ where: { id } });
         if (diary.userId.toString() !== userId.toString()) {
             const settings = await this.settingsRepository.findOne({ where: { userId: diary.userId } });
-            if (settings?.allowEveryonePost && settings?.allowMessageNotification) {
+            if (settings?.allow_everyone_post && settings?.allow_message_notification) {
                 await this.notificationRepository.save({
                     userId: diary.userId,
                     type: 'comment',

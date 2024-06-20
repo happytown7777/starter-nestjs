@@ -5,28 +5,25 @@ import { User } from "../../user/entities/user.entity";
 export class Settings {
     @PrimaryGeneratedColumn()
     id: number;
-
-    @Column({ default: false })
-    allowParentalControl: boolean;
-
-    @Column({ default: true })
-    allowEveryonePost: boolean;
-
-    @Column({ default: true })
-    allowReminder: boolean;
-
-    @Column({ default: true })
-    allowFamilyNotification: boolean;
-
-    @Column({ default: true })
-    allowMessageNotification: boolean;
-
+    
     @Column({ name: 'user_id' })
     userId: number;
 
     @OneToOne(() => User, { cascade: false, nullable: false, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;
+
+    @Column({ default: true })
+    allow_everyone_post: boolean;
+
+    @Column({ default: true })
+    allow_reminder: boolean;
+
+    @Column({ default: true })
+    allow_family_notification: boolean;
+
+    @Column({ default: true })
+    allow_message_notification: boolean;
 
     @CreateDateColumn()
     createdAt: Date;

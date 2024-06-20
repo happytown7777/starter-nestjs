@@ -21,10 +21,10 @@ export class SettingsService {
         try {
             const userSetting = await this.settingsRepository.find({ where: { userId } });
             await this.settingsRepository.update(userSetting[0].id, {
-                allowEveryonePost: settings?.allowEveryonePost,
-                allowReminder: settings?.allowReminder,
-                allowMessageNotification: settings?.allowMessageNotification,
-                allowFamilyNotification: settings?.allowFamilyNotification,
+                allow_everyone_post: settings?.allow_everyone_post,
+                allow_reminder: settings?.allow_reminder,
+                allow_message_notification: settings?.allow_message_notification,
+                allow_family_notification: settings?.allow_family_notification,
             })
             return { success: true };
         }

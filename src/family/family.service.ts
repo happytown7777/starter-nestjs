@@ -30,7 +30,12 @@ export class FamilyService {
     }
 
     async updateFamily(body, id): Promise<any> {
+        console.log("-------------family---------", body)
         try {
+            const family = await this.familyRepository.findOneBy({ id: body.id });
+            if (!family) {
+                return new HttpException('Family not found', HttpStatus.UNAUTHORIZED)
+            }
             await this.familyRepository.save(body);
             const user = await this.usersRepository.findOne({ where: { id: id } });
             return { user, errors: [] };

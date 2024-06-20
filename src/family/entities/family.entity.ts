@@ -23,7 +23,10 @@ export class Family {
 
     @Column()
     pin: string;
-    
+
+    @Column({ default: 1 })
+    structureType: number;
+
     @CreateDateColumn()
     createdAt: Date;
 

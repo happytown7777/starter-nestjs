@@ -50,7 +50,7 @@ export class UserService {
         const isGuardian = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
         const userRole = await this.rolesRepository.findOne({ where: { role: !isGuardian ? 'Child' : 'Parent' } });
 
-        if (!user.familyId && user.familyName) {
+        if (!user.isFindFamily && user.familyName) {
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
             user.familyId = newFamily.id;
         }
@@ -69,7 +69,7 @@ export class UserService {
             roleId: userRole.id,
         }
         const newUser = await this.usersRepository.save(reqBody);
-        await this.settingsRepository.upsert({ userId: newUser.id, allowParentalControl: user.allowParental, }, ['userId']);
+        await this.settingsRepository.upsert({ userId: newUser.id }, ['userId']);
         return { user: newUser };
     }
 

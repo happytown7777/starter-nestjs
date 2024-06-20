@@ -45,7 +45,6 @@ export class ChatsService {
                     { fromId: element.id, toId: user.id, seen: false },
                 ]
             });
-            console.log("----------unReadCount-------------", element.id, user.id, unReadCount)
 
             const pin = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: element.id, isGroup: false, type: 'pin' });
             const mute = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: element.id, isGroup: false, type: 'mute' });
@@ -57,7 +56,6 @@ export class ChatsService {
             .where("user.id = :userId", { userId: user.id })
             .getMany();
         for (let i = 0; i < groups.length; i++) {
-            console.log("------------groups id----------", groups[i].id);
             const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
             const users = element.chatGroupUser.map(cgu => cgu.user);
             const lastMessage = await this.chatRepository.findOne({
