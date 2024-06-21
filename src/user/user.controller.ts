@@ -8,9 +8,7 @@ import * as multer from 'multer';
 
 @Controller('/auth')
 export class UserController {
-    constructor(private readonly userServerice: UserService,
-        private jwtService: JwtService
-    ) {
+    constructor(private readonly userServerice: UserService, private jwtService: JwtService) {
 
     }
 
@@ -71,16 +69,10 @@ export class UserController {
         return response.status(HttpStatus.OK).json(res)
     }
 
-    @Post('/check-family')
-    async CheckFamily(@Res() response, @Body() body) {
-        const res = await this.userServerice.checkFamily(body);
-        return response.status(HttpStatus.OK).json(res)
-    }
-
-    @Post('/check-pin')
-    async CheckPin(@Res() response, @Body() body) {
-        const res = await this.userServerice.checkPin(body);
-        return response.status(HttpStatus.OK).json(res);
+    @Delete('/delete/:userId')
+    async removeDiaryComment(@Param('userId') userId: string, @Res() response, @Req() req) {
+        const result = await this.userServerice.deleteUser(userId);
+        return response.status(HttpStatus.OK).json(result);
     }
 
     @Get('/setting')

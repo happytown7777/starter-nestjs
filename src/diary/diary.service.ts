@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryTopic } from 'src/diary/entities/diary-topic.entity';
 import { Not, Repository } from 'typeorm';
 import { Diary } from './entities/diary.entity';
-import { parse } from 'path';
 import { DiaryLike } from './entities/diary-like.entity';
 import { DiaryComment } from './entities/diary-comments.entity';
 import { User } from 'src/user/entities/user.entity';

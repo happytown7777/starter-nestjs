@@ -13,6 +13,14 @@ export class FamilyController {
         const res = await this.familyServerice.createFamily(body);
         return response.status(HttpStatus.OK).json(res)
     }
+    
+  
+    @Post('/check')
+    async CheckFamily(@Res() response, @Body() body) {
+        const res = await this.familyServerice.checkFamily(body);
+        return response.status(HttpStatus.OK).json(res)
+    }
+  
 
     @Post('/update')
     async UpdateFamily(@Res() response, @Body() body, @Req() user: User) {

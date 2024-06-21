@@ -28,16 +28,26 @@ export class FamilyService {
             return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
         }
     }
+    
+    async checkFamily(body: any): Promise<any> {
+        const foundFamily = await this.familyRepository.findOne({ where: body });
+        if (foundFamily) {
+            console.log(foundFamily)
+            return { family: foundFamily };
+        }
+        else {
+            return { success: false, error: "Family not found" };
+        }
+    }
 
-    async updateFamily(body, id): Promise<any> {
-        console.log("-------------family---------", body)
+    async updateFamily(body: any, userId: number): Promise<any> {
         try {
             const family = await this.familyRepository.findOneBy({ id: body.id });
             if (!family) {
                 return new HttpException('Family not found', HttpStatus.UNAUTHORIZED)
             }
             await this.familyRepository.save(body);
-            const user = await this.usersRepository.findOne({ where: { id: id } });
+            const user = await this.usersRepository.findOne({ where: { id: userId } });
             return { user, errors: [] };
         }
         catch (e) {
@@ -45,7 +55,7 @@ export class FamilyService {
         }
     }
 
-    async findFamily(body): Promise<any> {
+    async findFamily(body: any): Promise<any> {
         try {
             const familyList = await this.familyRepository.find({ where: { name: Like(`%${body['name']}%`) }, relations: ['members'] });
             return { familyList: familyList };

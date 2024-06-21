@@ -194,34 +194,22 @@ export class UserService {
         return newUser;
     }
 
+    async deleteUser(userId): Promise<{ error?: string }> {
+        console.log("=====================userId", userId)
+        const foundUser = await this.usersRepository.findOne({ where: { id: userId } });
+        if (foundUser) {
+            await this.usersRepository.delete({ id: userId });
+            return { error: '' }
+        }
+        return { error: 'Member not found' }
+    }
+
     async updateProfile(body, user_id): Promise<User> {
         const user = await this.usersRepository.findOne({ where: { id: user_id } });
         if (user) {
             await this.usersRepository.update({ id: user_id }, body);
         }
         return body;
-    }
-
-    async checkFamily(body): Promise<any> {
-        const foundFamily = await this.familyRepository.findOne({ where: { name: body.findFamilyName } });
-        if (foundFamily) {
-            console.log(foundFamily)
-            return { family: foundFamily };
-        }
-        else {
-            return { error: "No matching Family account. Please check details." };
-        }
-    }
-
-    async checkPin(body): Promise<any> {
-        const foundFamily = await this.familyRepository.findOne({ where: { pin: body.findFamilyPin } });
-        if (foundFamily) {
-            console.log(foundFamily)
-            return { family: foundFamily };
-        }
-        else {
-            return { error: "No matching Family account. Please check details." };
-        }
     }
 
     async qrcode(fileBuffer: Buffer): Promise<any> {

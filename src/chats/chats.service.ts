@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryTopic } from 'src/diary/entities/diary-topic.entity';
 import { Not, Repository } from 'typeorm';
 import { ChatGroup } from './entities/chat-group.entity';
-import { parse } from 'path';
 import { User } from 'src/user/entities/user.entity';
 import { ChatChannel } from './entities/chat-channel.entity';
 import { Chat } from './entities/chat.entity';
@@ -69,10 +68,8 @@ export class ChatsService {
                     { toId: element.id, fromId: Not(user.id), isGroup: true, seen: false },
                 ]
             });
-            console.log("----------unReadCount-------------", unReadCount)
             const pin = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: groups[i].id, isGroup: true, type: 'pin' });
             const mute = await this.doesRecordExist(this.chatSettingRepository, { userId: auth_user.id, relatedId: groups[i].id, isGroup: true, type: 'mute' });
-            console.log("----------pin, mute-------------", pin, mute)
             channels.push(new ChatChannel(element.id, element.name, users, true, [], lastMessage, unReadCount, element.image, pin, mute));
         }
 

@@ -44,9 +44,4 @@ export class ChatsController {
         return response.status(HttpStatus.OK).json(result)
     }
 
-    // @Put('/channel/setting')
-    // async SettingChannel(@Req() req, @Res() response, @Body() body: { id: number, key: string, value: boolean }) {
-    //     const result = await this.chatsService.settingChannel(req.user.id, body)
-    //     return response.status(HttpStatus.OK).json(result);
-    // }
 }
