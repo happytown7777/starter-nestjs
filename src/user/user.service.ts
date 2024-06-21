@@ -48,7 +48,7 @@ export class UserService {
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
         const isGuardian = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
-        const userRole = await this.rolesRepository.findOne({ where: { role: !isGuardian ? 'Child' : 'Parent' } });
+        const userRole = await this.rolesRepository.findOne({ where: { role: isGuardian ? 'Parent' : 'Child' } });
 
         if (!user.isFindFamily && user.familyName) {
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
@@ -74,7 +74,7 @@ export class UserService {
     }
 
     async signin(user: User, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'role', 'settings'] });
+        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'role', 'settings', 'family.members.role'] });
         console.log(foundUser, user.password);
         if (foundUser) {
             const { password } = foundUser;
@@ -233,7 +233,7 @@ export class UserService {
     }
 
     async getOne(email: string): Promise<User> {
-        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'role', 'settings'] });
+        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'role', 'settings', 'family.members.role'] });
     }
 
     async userEmotion(userId: number): Promise<string> {
