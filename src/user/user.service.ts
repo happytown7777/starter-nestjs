@@ -67,6 +67,7 @@ export class UserService {
             emailVeiified: true,
             familyId: user.familyId,
             roleId: userRole.id,
+            customName: user.username,
         }
         const newUser = await this.usersRepository.save(reqBody);
         await this.settingsRepository.upsert({ userId: newUser.id }, ['userId']);
