@@ -23,16 +23,36 @@ export class DiaryService {
         private socketGateway: SocketGateway,
     ) { }
 
-    async getAllTopics(): Promise<DiaryTopic[]> {
-        return await this.diaryTopicRepository.find({});
+    async getAllTopics(familyId: number): Promise<any[]> {
+        const diaryTopics = await this.diaryTopicRepository.find({});
+
+        // Fetch counts of Diaries for each DiaryTopic
+        const topics = await Promise.all(diaryTopics.map(async diaryTopic => {
+            const count = await this.diaryRepository.createQueryBuilder('diary')
+                .leftJoin('diary.diaryTopic', 'diaryTopic')
+                .leftJoin(User, 'user', 'diary.userId = user.id')
+                .select('COUNT(diary.id)', 'count')
+                .where('user.familyId = :familyId', { familyId })
+                .andWhere('diary.diaryTopicId = :diaryTopicId', { diaryTopicId: diaryTopic.id })
+                .groupBy('diary.diaryTopicId')
+                .getRawOne();
+
+            return {
+                id: diaryTopic.id,
+                name: diaryTopic.name,
+                description: diaryTopic.description,
+                count: count ? count.count : 0  // If count is null (no diaries), default to 0
+            };
+        }));
+        return topics;
     }
 
-    async getDiaryList(userData, param: any = {}): Promise<Diary[]> {
+    async getDiaryList(user: any, param: any = {}): Promise<Diary[]> {
         let query = this.diaryRepository.createQueryBuilder('diary')
             .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
             .leftJoinAndSelect('diary.likes', 'likes')
             .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
-            .where('diary.userId = :userId', { userId: userData.id });
+            .where('diary.userId = :userId', { userId: user.id });
         if (param.searchKey) {
             // check title or content contains searchKey
             query = query.andWhere('(diary.title LIKE :searchKey OR diary.content LIKE :searchKey)', { searchKey: `%${param.searchKey}%` });
@@ -79,24 +99,24 @@ export class DiaryService {
                 user: user,
                 diaryTopic: topic,
             }
+            let saveDiary: any;
             if (topic) {
-                this.diaryRepository.save(diaryBody);
+                saveDiary = await this.diaryRepository.save(diaryBody);
             }
             const familyMemebers = await this.userRepository.find({ where: { familyId: user.familyId, id: Not(user.id) } });
             familyMemebers.forEach(async member => {
                 const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
-                console.log(settings, member)
-                if(settings?.allow_everyone_post && settings?.allow_family_notification) {
+                if (settings?.allow_everyone_post && settings?.allow_family_notification) {
                     this.notificationRepository.save({
                         userId: member.id,
                         type: 'diary',
                         title: `${user.customName ?? user.firstName} posted new diary`,
-                        content: `${user.customName ?? user.firstName} added new diary <b>${diary.title}</b>`,
-                        url: `/diary/view/${diary.id}`,
+                        content: `${user.customName ?? user.firstName} added new diary <b>${saveDiary.title}</b>`,
+                        url: `/diary/view/${saveDiary.id}`,
                     });
                     this.socketGateway.emitEvents(member.id.toString(), 'notification', {
                         title: `${user.customName ?? user.firstName} added new diary`,
-                        content: `${user.customName ?? user.firstName} added new diary ${diary.title}`
+                        content: `${user.customName ?? user.firstName} added new diary ${saveDiary.title}`
                     });
                 }
             });
@@ -219,5 +239,6 @@ export class DiaryService {
         const result = await query.getMany();
         return { diaryList: result };
     }
+
 
 }

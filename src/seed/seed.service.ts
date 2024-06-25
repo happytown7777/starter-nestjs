@@ -51,11 +51,11 @@ export class SeedService {
 
     async seedTopics() {
         const topics = [
-            { name: 'Emotion', description: 'Emotion', imgUrl: '/emotion.jpg' },
-            { name: 'Happiness', description: 'Happiness', imgUrl: '/happiness.jpg' },
-            { name: 'Gratitude', description: 'Gratitude', imgUrl: '/gratitude.jpg' },
-            { name: 'Wishes', description: 'Wishes', imgUrl: '/hope.jpg' },
-            { name: 'Future me', description: 'Future me', imgUrl: '/hope.jpg' },
+            { name: 'Emotion', description: 'Emotion', imgUrl: '/emotion.png' },
+            { name: 'Happiness', description: 'Happiness', imgUrl: '/happiness.png' },
+            { name: 'Gratitude', description: 'Gratitude', imgUrl: '/gratitude.png' },
+            { name: 'Hope', description: 'Hope', imgUrl: '/hope.png' },
+            { name: 'Desire', description: 'Desire', imgUrl: '/desire.png' },
         ];
 
         for (const topic of topics) {

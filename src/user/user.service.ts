@@ -76,7 +76,6 @@ export class UserService {
 
     async signin(user: User, jwt: JwtService): Promise<any> {
         const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'role', 'settings', 'family.members.role'] });
-        console.log(foundUser, user.password);
         if (foundUser) {
             const { password } = foundUser;
             if (await bcrypt.compare(user.password, password)) {

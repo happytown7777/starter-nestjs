@@ -32,7 +32,6 @@ export class FamilyService {
     async checkFamily(body: any): Promise<any> {
         const foundFamily = await this.familyRepository.findOne({ where: body });
         if (foundFamily) {
-            console.log(foundFamily)
             return { family: foundFamily };
         }
         else {

@@ -6,16 +6,16 @@ import { User } from 'src/user/entities/user.entity';
 export class DiaryController {
     constructor(private readonly diaryService: DiaryService) { }
 
-    @Get('topics')
-    async GetTopics(@Res() response) {
-        const topics = await this.diaryService.getAllTopics();
-        return response.status(HttpStatus.OK).json({ topics, });
+    @Post('topics')
+    async GetTopics(@Res() response, @Req() req) {
+        const topics = await this.diaryService.getAllTopics(req?.user?.family?.id);
+        return response.status(HttpStatus.OK).json({ topics });
     }
 
     @Post('all')
     async GetDiaryList(@Res() response, @Req() req, @Body() body: any) {
         const diaryList = await this.diaryService.getDiaryList(req.user, body);
-        return response.status(HttpStatus.OK).json({ diaryList, });
+        return response.status(HttpStatus.OK).json({ diaryList });
     }
 
     @Get(':id')
@@ -65,4 +65,5 @@ export class DiaryController {
         const result = await this.diaryService.getUserDiaryList(id, req.user.family.id, body);
         return response.status(HttpStatus.OK).json(result);
     }
+
 }
