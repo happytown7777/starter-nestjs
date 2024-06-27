@@ -57,6 +57,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('delete')
+  async handleDelete(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
+    const msgData = await this.chatService.deleteMessage(data?.link);
+    if (data.isGroup) {
+      const users = await this.chatService.getGroupUsers(data.toId);
+      for (const user of users) {
+        if (user.id != data.fromId) {
+          this.emitEvents(user.id, 'delete', data);
+        }
+      }
+    }
+    else {
+      this.emitEvents(data.toId, 'delete', data);
+    }
+  }
+
   @SubscribeMessage('read')
   async handleRead(@ConnectedSocket() client: Socket, @MessageBody() data: {
     toId: number
@@ -111,5 +127,4 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.emitEvents(userId, msg, obj);
     }
   }
-
 }

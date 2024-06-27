@@ -117,6 +117,7 @@ export class FamilyService {
     }
 
     async createMoto(user, body): Promise<any> {
+        console.log("=================createMoto==============", body)
         try {
             const newMoto = await this.familyMotoRepository.save({ name: body.name, description: body.description, familyId: user.familyId });
             return { newMoto };

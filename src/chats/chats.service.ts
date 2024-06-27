@@ -170,6 +170,18 @@ export class ChatsService {
         };
     }
 
+    async deleteMessage(link: string): Promise<{ error?: string }> {
+        const exist = await this.chatRepository.findOne({ where: { link: link } });
+        if (exist) {
+            await this.chatRepository.delete({ link: link });
+            return {};
+        }
+        else {
+            return { error: "No matching user channel" };
+        }
+    }
+
+
     async getGroupUsers(channelId: number): Promise<User[]> {
         const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
         const users = channel.chatGroupUser.map(cgu => cgu.user);
