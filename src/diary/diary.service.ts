@@ -110,13 +110,13 @@ export class DiaryService {
                     this.notificationRepository.save({
                         userId: member.id,
                         type: 'diary',
-                        title: `${user.customName ?? user.firstName} posted new diary`,
-                        content: `${user.customName ?? user.firstName} added new diary <b>${saveDiary.title}</b>`,
+                        title: `${user.firstName} posted new diary`,
+                        content: `${user.firstName} added new diary <b>${saveDiary.title}</b>`,
                         url: `/diary/view/${saveDiary.id}`,
                     });
                     this.socketGateway.emitEvents(member.id.toString(), 'notification', {
-                        title: `${user.customName ?? user.firstName} added new diary`,
-                        content: `${user.customName ?? user.firstName} added new diary ${saveDiary.title}`
+                        title: `${user.firstName} added new diary`,
+                        content: `${user.firstName} added new diary ${saveDiary.title}`
                     });
                 }
             });
@@ -182,12 +182,12 @@ export class DiaryService {
                     userId: diary.userId,
                     type: 'comment',
                     title: `Commented to your diary`,
-                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
+                    content: `${diary.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
                     url: `/diary/view/${diary.id}`,
                 });
                 this.socketGateway.emitEvents(diary.userId.toString(), 'notification', {
-                    title: `${diary.user.customName ?? diary.user.firstName} commented on your diary`,
-                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
+                    title: `${diary.user.firstName} commented on your diary`,
+                    content: `${diary.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
                 });
             }
         }
