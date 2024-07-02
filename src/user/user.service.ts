@@ -61,6 +61,7 @@ export class UserService {
             fullName: user.firstName + ' ' + user.lastName,
             birthdate: user.birthdate,
             username: user.username,
+            customName: user.customName,
             guardianId: user.guardianId,
             email: user.email,
             password: hash,

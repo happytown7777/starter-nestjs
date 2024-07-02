@@ -54,8 +54,8 @@ export class SeedService {
             { name: 'Emotion', description: 'Emotion', imgUrl: '/emotion.png' },
             { name: 'Happiness', description: 'Happiness', imgUrl: '/happiness.png' },
             { name: 'Gratitude', description: 'Gratitude', imgUrl: '/gratitude.png' },
-            { name: 'Hope', description: 'Hope', imgUrl: '/hope.png' },
-            { name: 'Desire', description: 'Desire', imgUrl: '/desire.png' },
+            { name: 'Wishes', description: 'Wishes', imgUrl: '/wishes.png' },
+            { name: 'Future Me', description: 'Future Me', imgUrl: '/futureme.png' },
         ];
 
         for (const topic of topics) {

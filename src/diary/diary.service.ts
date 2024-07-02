@@ -99,24 +99,24 @@ export class DiaryService {
                 user: user,
                 diaryTopic: topic,
             }
-            let saveDiary: any;
             if (topic) {
-                saveDiary = await this.diaryRepository.save(diaryBody);
+                this.diaryRepository.save(diaryBody);
             }
             const familyMemebers = await this.userRepository.find({ where: { familyId: user.familyId, id: Not(user.id) } });
             familyMemebers.forEach(async member => {
                 const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
+                console.log(settings, member)
                 if (settings?.allow_everyone_post && settings?.allow_family_notification) {
                     this.notificationRepository.save({
                         userId: member.id,
                         type: 'diary',
-                        title: `${user.firstName} posted new diary`,
-                        content: `${user.firstName} added new diary <b>${saveDiary.title}</b>`,
-                        url: `/diary/view/${saveDiary.id}`,
+                        title: `${user.customName ?? user.firstName} posted new diary`,
+                        content: `${user.customName ?? user.firstName} added new diary <b>${diary.title}</b>`,
+                        url: `/diary/view/${diary.id}`,
                     });
                     this.socketGateway.emitEvents(member.id.toString(), 'notification', {
-                        title: `${user.firstName} added new diary`,
-                        content: `${user.firstName} added new diary ${saveDiary.title}`
+                        title: `${user.customName ?? user.firstName} added new diary`,
+                        content: `${user.customName ?? user.firstName} added new diary ${diary.title}`
                     });
                 }
             });
@@ -125,6 +125,7 @@ export class DiaryService {
             return err.message;
         }
     }
+
 
     async editDiary(diary, user): Promise<string> {
         try {
@@ -182,12 +183,12 @@ export class DiaryService {
                     userId: diary.userId,
                     type: 'comment',
                     title: `Commented to your diary`,
-                    content: `${diary.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
+                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
                     url: `/diary/view/${diary.id}`,
                 });
                 this.socketGateway.emitEvents(diary.userId.toString(), 'notification', {
-                    title: `${diary.user.firstName} commented on your diary`,
-                    content: `${diary.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
+                    title: `${diary.user.customName ?? diary.user.firstName} commented on your diary`,
+                    content: `${diary.user.customName ?? diary.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
                 });
             }
         }
