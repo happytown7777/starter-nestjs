@@ -17,15 +17,9 @@ export class SettingsService {
             return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
         }
     }
-    async updateUserSettings(userId: number, settings: any): Promise<any> {
+    async updateUserSettings(userId: number, body: any): Promise<any> {
         try {
-            const userSetting = await this.settingsRepository.find({ where: { userId } });
-            await this.settingsRepository.update(userSetting[0].id, {
-                allow_everyone_post: settings?.allow_everyone_post,
-                allow_reminder: settings?.allow_reminder,
-                allow_message_notification: settings?.allow_message_notification,
-                allow_family_notification: settings?.allow_family_notification,
-            })
+            await this.settingsRepository.update({ userId }, body)
             return { success: true };
         }
         catch (e) {

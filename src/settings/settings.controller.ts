@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Put, Req, Res } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { User } from 'src/user/entities/user.entity';
 
@@ -9,7 +9,7 @@ export class SettingsController {
     }
 
     @Get('')
-    async GetUserSetting(@Res() response,@Req() req) {
+    async GetUserSetting(@Res() response, @Req() req) {
         const res = await this.settingsServerice.getUserSettings(req.user.id);
         return response.status(HttpStatus.OK).json(res)
     }

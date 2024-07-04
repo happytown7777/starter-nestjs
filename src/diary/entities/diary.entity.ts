@@ -21,7 +21,7 @@ export class Diary {
     // @Column({ length: 255 })
     // title: string;
 
-    @Column({ length: 8192, nullable: true })
+    @Column({ name: 'image_url', length: 8192, nullable: true })
     imageUrl: string;
 
     @Column({ name: 'user_id' })

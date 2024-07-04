@@ -18,13 +18,13 @@ export class Family {
     @OneToOne(() => User, user => user.family, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
     owner: User;
 
-    @Column({ length: 1024, nullable: true })
+    @Column({name: 'image_url', length: 8192, nullable: true })
     imgUrl: string;
 
-    @Column()
-    pin: string;
+    @Column({ name: 'family_pin', default: null })
+    familyPin: string;
 
-    @Column({ default: 1 })
+    @Column({ name: 'structure_type', default: 1 })
     structureType: number;
 
     @CreateDateColumn()

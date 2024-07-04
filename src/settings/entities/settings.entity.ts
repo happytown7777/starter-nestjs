@@ -5,7 +5,7 @@ import { User } from "../../user/entities/user.entity";
 export class Settings {
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     @Column({ name: 'user_id' })
     userId: number;
 
@@ -13,17 +13,26 @@ export class Settings {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ default: true })
-    allow_everyone_post: boolean;
+    @Column({ name: 'allow_everyone_post', default: true })
+    allowEveryonePost: boolean;
 
-    @Column({ default: true })
-    allow_reminder: boolean;
+    @Column({ name: 'allow_reminder', default: true })
+    allowReminder: boolean;
 
-    @Column({ default: true })
-    allow_family_notification: boolean;
+    @Column({ name: 'allow_family_notification', default: true })
+    allowFamilyNotification: boolean;
 
-    @Column({ default: true })
-    allow_message_notification: boolean;
+    @Column({ name: 'allow_message_notification', default: true })
+    allowMessageNotification: boolean;
+
+    @Column({ name: 'diary_pin', default: null })
+    diaryPin: string;
+
+    @Column({ name: 'theme_mode', default: true })
+    themeMode: boolean;
+
+    @Column({ name: 'default_theme', default: true })
+    defaultTheme: boolean;
 
     @CreateDateColumn()
     createdAt: Date;

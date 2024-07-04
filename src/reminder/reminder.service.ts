@@ -22,9 +22,9 @@ export class ReminderService {
     @Cron(CronExpression.EVERY_DAY_AT_8PM)
     async handleCron() {
         this.logger.debug('Called when the current second is 0');
-        const settings = await this.settingsRepository.find({ where: { allow_reminder: true } });
+        const settings = await this.settingsRepository.find({ where: { allowReminder: true } });
         for(let i = 0; i < settings.length; i++) {
-            if (settings[i]?.allow_everyone_post && settings[i]?.allow_reminder) {
+            if (settings[i]?.allowEveryonePost && settings[i]?.allowReminder) {
                 const todayDiary = await this.diaryRepository.count({ where: { userId: settings[i].userId, date: new Date() } });
                 if (todayDiary == 0) {
                     await this.notificationRepository.save({

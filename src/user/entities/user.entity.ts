@@ -9,13 +9,13 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ name: 'full_name' })
     fullName: string;
 
-    @Column()
+    @Column(({ name: 'first_name' }))
     firstName: string;
 
-    @Column()
+    @Column({ name: 'last_name' })
     lastName: string;
 
     @Column()
@@ -24,16 +24,19 @@ export class User {
     @Column()
     birthdate: Date;
 
-    @Column({ nullable: true })
+    @Column({ length: 8192, nullable: true })
     avatar: string;
 
     @Column({ unique: true, nullable: true })
     email: string;
 
+    @Column({ unique: true, nullable: true })
+    phone: string;
+
     @Column({ nullable: true })
     password: string;
 
-    @Column({ default: true })
+    @Column({ name: 'email_verified', default: true })
     emailVerified: boolean;
 
     @Column({ default: true })
@@ -44,7 +47,7 @@ export class User {
 
     @Column({ nullable: true, name: 'custom_name' })
     customName: string;
-    
+
     @Column({ name: 'current_emotion', nullable: true })
     currentEmotion: string;
 
@@ -72,12 +75,9 @@ export class User {
     @ManyToOne(() => User, { nullable: true, eager: false })
     @JoinColumn({ name: 'guardian_id' })
     gurdian: User | null;
-    
+
     @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.user)
     chatGroupUser: ChatGroupUser[];
-    // @OneToMany(() => User, (user) => user.gurdian)
-    // @JoinColumn({ name: 'guardianId' })
-    // children: User[];
 
     @CreateDateColumn()
     createdAt: Date;

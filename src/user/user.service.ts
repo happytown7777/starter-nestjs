@@ -204,12 +204,12 @@ export class UserService {
         return { error: 'Member not found' }
     }
 
-    async updateProfile(body, user_id): Promise<User> {
+    async updateProfile(body, user_id): Promise<any> {
         const user = await this.usersRepository.findOne({ where: { id: user_id } });
         if (user) {
             await this.usersRepository.update({ id: user_id }, body);
         }
-        return body;
+        return { success: true, body: body };
     }
 
     async qrcode(fileBuffer: Buffer): Promise<any> {
