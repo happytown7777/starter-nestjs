@@ -13,7 +13,7 @@ export class ChatGroupUser {
   @Column({ name: 'chat_group_id' })
   chatGroupId: number;
 
-  @ManyToOne(() => User, user => user.chatGroupUser)
+  @ManyToOne(() => User, user => user.chatGroupUser, {onDelete: 'CASCADE'})
   @JoinColumn({name: 'user_id'})
   user: User;
 

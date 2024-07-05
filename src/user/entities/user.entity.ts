@@ -33,6 +33,9 @@ export class User {
     @Column({ unique: true, nullable: true })
     phone: string;
 
+    @Column({ name: 'diary_pin', default: null })
+    diaryPin: string;
+
     @Column({ nullable: true })
     password: string;
 

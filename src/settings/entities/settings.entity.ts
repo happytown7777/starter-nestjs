@@ -25,9 +25,6 @@ export class Settings {
     @Column({ name: 'allow_message_notification', default: true })
     allowMessageNotification: boolean;
 
-    @Column({ name: 'diary_pin', default: null })
-    diaryPin: string;
-
     @Column({ name: 'theme_mode', default: true })
     themeMode: boolean;
 
