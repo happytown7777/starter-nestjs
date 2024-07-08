@@ -8,13 +8,13 @@ export class SettingsController {
 
     }
 
-    @Get('')
-    async GetUserSetting(@Res() response, @Req() req) {
-        const res = await this.settingsServerice.getUserSettings(req.user.id);
+    @Post('/get')
+    async GetUserSetting(@Res() response, @Req() req, @Body() body) {
+        const res = await this.settingsServerice.getUserSettings(body?.userId);
         return response.status(HttpStatus.OK).json(res)
     }
 
-    @Post('')
+    @Post('/update')
     async UpdateUserSetting(@Res() response, @Req() req, @Body() body) {
         const res = await this.settingsServerice.updateUserSettings(req.user.id, body);
         return response.status(HttpStatus.OK).json(res)

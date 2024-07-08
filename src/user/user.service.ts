@@ -32,7 +32,7 @@ export class UserService {
         @InjectRepository(Roles) private rolesRepository: Repository<Roles>,
     ) { }
 
-    async signup(user): Promise<any> {
+    async signup(user: any): Promise<any> {
         console.log("======signUp_user=====", user);
         let error = {};
         if (await this.usersRepository.exist({
