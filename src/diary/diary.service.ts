@@ -29,8 +29,8 @@ export class DiaryService {
         // Fetch counts of Diaries for each DiaryTopic
         const topics = await Promise.all(diaryTopics.map(async diaryTopic => {
             const count = await this.diaryRepository.createQueryBuilder('diary')
-                .leftJoin('diary.diaryTopic', 'diaryTopic')
-                .leftJoin(User, 'user', 'diary.userId = user.id')
+                .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
+                .leftJoinAndSelect(User, 'user', 'diary.userId = user.id')
                 .select('COUNT(diary.id)', 'count')
                 .where('user.familyId = :familyId', { familyId })
                 .andWhere('diary.diaryTopicId = :diaryTopicId', { diaryTopicId: diaryTopic.id })
@@ -51,6 +51,7 @@ export class DiaryService {
         let query = this.diaryRepository.createQueryBuilder('diary')
             .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
             .leftJoinAndSelect('diary.likes', 'likes')
+            .leftJoinAndSelect('diary.user', 'user')
             .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
             .where('diary.userId = :userId', { userId: user.id });
         if (param.searchKey) {

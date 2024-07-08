@@ -28,7 +28,7 @@ export class FamilyService {
             return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)
         }
     }
-    
+
     async checkFamily(body: any): Promise<any> {
         const foundFamily = await this.familyRepository.findOne({ where: body });
         if (foundFamily) {
@@ -39,15 +39,14 @@ export class FamilyService {
         }
     }
 
-    async updateFamily(body: any, userId: number): Promise<any> {
+    async updateFamily(body: any): Promise<any> {
         try {
             const family = await this.familyRepository.findOneBy({ id: body.id });
             if (!family) {
                 return new HttpException('Family not found', HttpStatus.UNAUTHORIZED)
             }
             await this.familyRepository.save(body);
-            const user = await this.usersRepository.findOne({ where: { id: userId } });
-            return { user, errors: [] };
+            return { errors: [] };
         }
         catch (e) {
             return new HttpException('Incorrect email or password', HttpStatus.UNAUTHORIZED)

@@ -18,8 +18,8 @@ export class Diary {
     @Column('longtext')
     content: string;
 
-    // @Column({ length: 255 })
-    // title: string;
+    @Column({ name: 'is_secret', default: false })
+    isSecret: boolean;
 
     @Column({ name: 'image_url', length: 8192, nullable: true })
     imageUrl: string;

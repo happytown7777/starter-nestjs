@@ -23,8 +23,8 @@ export class FamilyController {
   
 
     @Post('/update')
-    async UpdateFamily(@Res() response, @Body() body, @Req() user: User) {
-        const res = await this.familyServerice.updateFamily(body, user.id);
+    async UpdateFamily(@Res() response, @Body() body) {
+        const res = await this.familyServerice.updateFamily(body);
         return response.status(HttpStatus.OK).json(res)
     }
 
