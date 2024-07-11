@@ -18,12 +18,14 @@ import { ThreadLike } from './community/entities/thread-like.entity';
 import { ThreadComment } from './community/entities/thread-comments.entity';
 import { ThreadView } from './community/entities/thread-view.entity';
 import { NotificationEntity } from './notification/entities/notification.entity';
-import { ChatGroupUser } from './chats/entities/chat_group_user.entity';
+import { ChatGroupUser } from './chats/entities/chat-group-user.entity';
 import { ChatSetting } from './chats/entities/chat-setting.entity';
+import { DiaryUser } from './diary/entities/diary-user.entity';
 
 export const entities = [
     User,
     Diary,
+    DiaryUser,
     DiaryTopic,
     Family,
     Settings,

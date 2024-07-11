@@ -6,7 +6,7 @@ import { User } from '../user/entities/user.entity';
 import { ChatGroup } from './entities/chat-group.entity';
 import { Chat } from './entities/chat.entity';
 import { SocketModule } from 'src/socket/socket.module';
-import { ChatGroupUser } from './entities/chat_group_user.entity';
+import { ChatGroupUser } from './entities/chat-group-user.entity';
 import { ChatSetting } from './entities/chat-setting.entity';
 
 @Module({

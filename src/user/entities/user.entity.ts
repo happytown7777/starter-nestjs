@@ -2,7 +2,8 @@ import { Family } from "src/family/entities/family.entity";
 import { Settings } from "src/settings/entities/settings.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Roles } from "./roles.entity";
-import { ChatGroupUser } from "src/chats/entities/chat_group_user.entity";
+import { ChatGroupUser } from "src/chats/entities/chat-group-user.entity";
+import { DiaryUser } from "src/diary/entities/diary-user.entity";
 
 @Entity()
 export class User {
@@ -81,6 +82,9 @@ export class User {
 
     @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.user)
     chatGroupUser: ChatGroupUser[];
+
+    @OneToMany(() => DiaryUser, diaryUser => diaryUser.user)
+    diaryUser: DiaryUser[];
 
     @CreateDateColumn()
     createdAt: Date;

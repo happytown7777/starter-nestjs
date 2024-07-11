@@ -23,9 +23,9 @@ export class ReminderService {
     async handleCron() {
         this.logger.debug('Called when the current second is 0');
         const settings = await this.settingsRepository.find({ where: { allowReminder: true } });
-        for(let i = 0; i < settings.length; i++) {
+        for (let i = 0; i < settings.length; i++) {
             if (settings[i]?.allowEveryonePost && settings[i]?.allowReminder) {
-                const todayDiary = await this.diaryRepository.count({ where: { userId: settings[i].userId, date: new Date() } });
+                const todayDiary = await this.diaryRepository.count({ where: { date: new Date(), diaryUser: { userId: settings[i].userId } } });
                 if (todayDiary == 0) {
                     await this.notificationRepository.save({
                         fromId: settings[i].userId,

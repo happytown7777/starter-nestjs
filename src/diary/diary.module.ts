@@ -12,9 +12,10 @@ import { ChatGroup } from 'src/chats/entities/chat-group.entity';
 import { NotificationEntity } from 'src/notification/entities/notification.entity';
 import { Settings } from 'src/settings/entities/settings.entity';
 import { SocketModule } from 'src/socket/socket.module';
+import { DiaryUser } from './entities/diary-user.entity';
 
 @Module({
-  imports: [SocketModule, TypeOrmModule.forFeature([User, Diary, DiaryTopic, DiaryLike, DiaryComment, Chat, ChatGroup, NotificationEntity, Settings])],
+  imports: [SocketModule, TypeOrmModule.forFeature([User, Diary, DiaryUser, DiaryTopic, DiaryLike, DiaryComment, Chat, ChatGroup, NotificationEntity, Settings])],
   providers: [DiaryService],
   controllers: [DiaryController]
 })

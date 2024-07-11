@@ -7,17 +7,18 @@ export class ChatGroupUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'user_id' })
-  userId: number;
-
   @Column({ name: 'chat_group_id' })
   chatGroupId: number;
+
+  @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUser, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'chat_group_id' })
+  chatGroup: ChatGroup;
+  
+  @Column({ name: 'user_id' })
+  userId: number;
 
   @ManyToOne(() => User, user => user.chatGroupUser, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUser, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'chat_group_id' })
-  chatGroup: ChatGroup;
 }

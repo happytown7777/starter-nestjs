@@ -6,7 +6,7 @@ import { ChatGroup } from './entities/chat-group.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ChatChannel } from './entities/chat-channel.entity';
 import { Chat } from './entities/chat.entity';
-import { ChatGroupUser } from './entities/chat_group_user.entity';
+import { ChatGroupUser } from './entities/chat-group-user.entity';
 import { ChatSetting } from './entities/chat-setting.entity';
 
 
@@ -20,7 +20,7 @@ export class ChatsService {
         @InjectRepository(ChatSetting) private chatSettingRepository: Repository<ChatSetting>,
     ) { }
 
-    async doesRecordExist(repository, conditions): Promise<boolean> {
+    async doesRecordExist(repository: any, conditions: any): Promise<boolean> {
         const record = await repository.findOne({ where: conditions });
         return record !== null;
     }
@@ -104,11 +104,12 @@ export class ChatsService {
     }
 
     async createChannel(auth_user: User, body: { name: string, members: User[], image?: string }): Promise<any> {
-        const exsitsName = await this.chatGroupRepository.findOne({ where: { name: body.name } });
-        if (exsitsName) return { success: false, error: 'Group subject already exists' };
+        const exist = await this.chatGroupRepository.findOne({ where: { name: body.name } });
+        if (exist) return { success: false, error: 'Group subject already exists' };
         const newGroup = await this.chatGroupRepository.create({
             name: body.name,
             image: body.image,
+            userId: auth_user.id,
         });
         const savedGroup = await this.chatGroupRepository.save(newGroup);
         const chatGroupUsers = body.members.map(member => {

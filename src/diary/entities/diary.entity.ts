@@ -3,6 +3,7 @@ import { User } from "../../user/entities/user.entity";
 import { DiaryTopic } from "./diary-topic.entity";
 import { DiaryLike } from "./diary-like.entity";
 import { DiaryComment } from "./diary-comments.entity";
+import { DiaryUser } from "./diary-user.entity";
 
 @Entity()
 export class Diary {
@@ -30,6 +31,9 @@ export class Diary {
     @ManyToOne(() => User, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;
+
+    @OneToMany(() => DiaryUser, diaryUser => diaryUser.diary)
+    diaryUser: DiaryUser[];
 
     @Column({ name: 'diary_topic_id' })
     diaryTopicId: number;

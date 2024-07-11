@@ -66,4 +66,10 @@ export class DiaryController {
         return response.status(HttpStatus.OK).json(result);
     }
 
+    @Post('/share')
+    async CreateChannel(@Res() response, @Req() req, @Body() body: { diaryId: number, members: User[] }) {
+        const res = await this.diaryService.shareDiary(req.user, body);
+        return response.status(HttpStatus.OK).json(res);
+    }
+
 }
