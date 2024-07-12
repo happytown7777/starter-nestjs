@@ -26,14 +26,20 @@ export class DiaryController {
 
     @Post('post')
     async postDiary(@Res() response, @Body() body, @Req() req) {
-        const msg = await this.diaryService.postDiary(body, req.user);
-        return response.status(HttpStatus.OK).json({ error: msg, });
+        const res = await this.diaryService.postDiary(body, req.user);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('edit')
     async editDiary(@Res() response, @Body() body, @Req() req) {
-        const msg = await this.diaryService.editDiary(body, req.user);
-        return response.status(HttpStatus.OK).json({ error: msg, });
+        const res = await this.diaryService.editDiary(body, req.user);
+        return response.status(HttpStatus.OK).json(res);
+    }
+
+    @Post('update')
+    async updateDiary(@Res() response, @Body() body, @Req() req) {
+        const res = await this.diaryService.updateDiary(body, req.user.id);
+        return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('/like/:id')

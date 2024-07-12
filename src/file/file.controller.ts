@@ -20,6 +20,12 @@ export class FileController {
         // fileFilter: imageFileFilter,
     }))
     uploadFile(@Res() response, @UploadedFile() file: Express.Multer.File) {
+        console.log("===============file============", file)
+        if (!file) {
+            return response.status(HttpStatus.BAD_REQUEST).json({
+                error: 'No file uploaded',
+            });
+        }
         return response.status(HttpStatus.OK).json({
             url: file.path.replace(/public/, ''),
         })

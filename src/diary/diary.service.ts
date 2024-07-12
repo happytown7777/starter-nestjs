@@ -86,7 +86,7 @@ export class DiaryService {
 
     async getDiaryData(diaryId: any, userId: number): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
-        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser', 'user'] });
         const exist = result.diaryUser.find(diaryUser => diaryUser.userId === user.id);
         if (exist) {
             return { diary: result };
@@ -137,12 +137,12 @@ export class DiaryService {
             });
             return;
         } catch (err) {
-            return err.message;
+            return { error: err.message };
         }
     }
 
 
-    async editDiary(diary, user): Promise<string> {
+    async editDiary(diary: any, user: User): Promise<any> {
         try {
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
@@ -157,9 +157,23 @@ export class DiaryService {
             }
             return;
         } catch (err) {
-            return err.message;
+            return { error: err.message };
         }
     }
+
+
+    async updateDiary(body: any, userId: number): Promise<any> {
+        console.log("=============updateDiary=========", body)
+        const diary = await this.diaryRepository.findOne({ where: { id: body.id } });
+        if (!diary) {
+            return { error: 'Diary not found' };
+        }
+        else {
+            await this.diaryRepository.update({ id: body.id }, body);
+            return { success: true };
+        }
+    }
+
 
     async likeDiary(diaryId: any, userId: number): Promise<void> {
         const exist = await this.diaryLikeRepository.findOne({ where: { userId, diaryId } });
