@@ -37,31 +37,31 @@ export class DiaryController {
     }
 
     @Post('/like/:id')
-    async likeDiary(@Param('id') id: string, @Res() response, @Req() req) {
+    async likeDiary(@Param('id') id: number, @Res() response, @Req() req) {
         await this.diaryService.likeDiary(id, req.user.id);
         return response.status(HttpStatus.OK).json();
     }
 
     @Delete('/delete/:id')
-    async deleteDiary(@Param('id') id: string, @Res() response, @Req() req) {
+    async deleteDiary(@Param('id') id: number, @Res() response, @Req() req) {
         const result = await this.diaryService.deleteDiary(id, req.user.id);
         return response.status(HttpStatus.OK).json(result);
     }
 
     @Post('/:id/comment')
-    async addDiaryComment(@Param('id') id: string, @Res() response, @Req() req, @Body('comment') comment, @Body('parentId') parentId,) {
+    async addDiaryComment(@Param('id') id: number, @Res() response, @Req() req, @Body('comment') comment, @Body('parentId') parentId,) {
         const result = await this.diaryService.addDiaryComment(id, req.user.id, parentId, comment);
         return response.status(HttpStatus.OK).json(result);
     }
 
     @Delete('/comment/:id')
-    async removeDiaryComment(@Param('id') id: string, @Res() response, @Req() req) {
+    async removeDiaryComment(@Param('id') id: number, @Res() response, @Req() req) {
         const result = await this.diaryService.removeDiaryComment(id, req.user.id);
         return response.status(HttpStatus.OK).json(result);
     }
 
     @Post('/user/:id')
-    async getUserDiary(@Param('id') id: string, @Res() response, @Req() req, @Body() body,) {
+    async getUserDiary(@Param('id') id: number, @Res() response, @Req() req, @Body() body,) {
         const result = await this.diaryService.getUserDiaryList(id, req.user.family.id, body);
         return response.status(HttpStatus.OK).json(result);
     }

@@ -86,9 +86,9 @@ export class DiaryService {
 
     async getDiaryData(diaryId: any, userId: number): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
-        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments'] });
-
-        if (result.diaryUser.find(diaryUser => diaryUser.userId === user.id)) {
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
+        const exist = result.diaryUser.find(diaryUser => diaryUser.userId === user.id);
+        if (exist) {
             return { diary: result };
         } else {
             return { error: "Not Allowed" };
@@ -213,20 +213,23 @@ export class DiaryService {
         return { error: '' }
     }
 
-    async removeDiaryComment(id, userId): Promise<{ error?: string }> {
-        let diaryComment = await this.diaryCommentRepository.findOne({
-            where: {
-                id,
-                userId,
-            }
-        });
-        if (diaryComment) {
-            await this.diaryCommentRepository.delete({ id });
-            return { error: '' }
-        }
-        else {
+    async removeDiaryComment(id: number, userId: number): Promise<{ error?: string }> {
+        let diaryComment = await this.diaryCommentRepository.findOne({ where: { id, userId } });
+
+        if (!diaryComment) {
             return { error: 'No matching comment. Please check details.' }
         }
+
+        const deleteCommentAndChildren = async (parentId: number | null) => {
+            const commentList = await this.diaryCommentRepository.find({ where: { parentId } });
+            for (const comment of commentList) {
+                await deleteCommentAndChildren(comment.id)
+                await this.diaryCommentRepository.delete({ id: comment.id });
+            }
+        }
+
+        await deleteCommentAndChildren(id);
+        await this.diaryCommentRepository.delete({ id })
     }
 
     async getUserDiaryList(userId, familyId, param: any = {}): Promise<any> {
