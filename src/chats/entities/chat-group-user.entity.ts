@@ -10,15 +10,14 @@ export class ChatGroupUser {
   @Column({ name: 'chat_group_id' })
   chatGroupId: number;
 
-  @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUser, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ChatGroup, chatGroup => chatGroup.chatGroupUser, { cascade: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'chat_group_id' })
   chatGroup: ChatGroup;
-  
+
   @Column({ name: 'user_id' })
   userId: number;
 
-  @ManyToOne(() => User, user => user.chatGroupUser, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.chatGroupUser, { cascade: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
 }

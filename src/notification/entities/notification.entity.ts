@@ -21,16 +21,12 @@ export class NotificationEntity {
     @Column({ name: 'from_id', nullable: true })
     fromId: number;
 
-    @Column({ name: 'to_id', nullable: true})
-    toId: number;
-
-    @ManyToOne(() => User, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
+    @ManyToOne(() => User, { cascade: true, nullable: true, eager: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'from_id' })
     fromUser: User;
 
-    @ManyToOne(() => User, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'to_id' })
-    toUser: User;
+    @Column({ name: 'to_id', nullable: true })
+    toId: number;
 
     @CreateDateColumn()
     createdAt: Date;

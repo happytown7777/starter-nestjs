@@ -28,10 +28,6 @@ export class Diary {
     @Column({ name: 'user_id' })
     userId: number;
 
-    @ManyToOne(() => User, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
-    user: User;
-
     @OneToMany(() => DiaryUser, diaryUser => diaryUser.diary)
     diaryUser: DiaryUser[];
 

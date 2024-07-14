@@ -10,13 +10,9 @@ export class ChatGroup {
 
     @Column({ length: 50 })
     name: string;
-    
+
     @Column({ name: 'user_id' })
     userId: number;
-
-    @ManyToOne(() => User, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
-    user: User;
 
     @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.chatGroup)
     chatGroupUser: ChatGroupUser[];

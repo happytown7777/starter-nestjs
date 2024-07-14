@@ -26,6 +26,7 @@ export class ChatsService {
     }
 
     async getAllChannels(auth_user: User): Promise<ChatChannel[]> {
+        console.log("==============chatGroupUser===============", auth_user)
         const user = await this.userRepository.findOne({ where: { email: auth_user.email }, relations: ['family'] })
         const family_members = user.family.members;
         const channels = [];
@@ -50,12 +51,19 @@ export class ChatsService {
             channels.push(new ChatChannel(element.id, element.fullName, [element], false, [], lastMessage, unReadCount, element.avatar, pin, mute));
         }
         const groups = await this.chatGroupRepository.createQueryBuilder("chat_group")
-            .innerJoinAndSelect("chat_group.chatGroupUser", "cgu")
-            .innerJoinAndSelect("cgu.user", "user")
+            .leftJoinAndSelect("chat_group.chatGroupUser", "cgu")
+            .leftJoinAndSelect("cgu.user", "user")
             .where("user.id = :userId", { userId: user.id })
             .getMany();
+
         for (let i = 0; i < groups.length; i++) {
             const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
+
+            if (!element) {
+                console.error(`ChatGroup with id ${groups[i].id} not found`);
+                continue;
+            }
+
             const users = element.chatGroupUser.map(cgu => cgu.user);
             const lastMessage = await this.chatRepository.findOne({
                 where: [
@@ -112,17 +120,17 @@ export class ChatsService {
             userId: auth_user.id,
         });
         const savedGroup = await this.chatGroupRepository.save(newGroup);
-        const chatGroupUsers = body.members.map(member => {
+        const chatGroupUser = body.members.map(member => {
             return this.chatGroupUserRepository.create({
                 user: member,
                 chatGroup: savedGroup,
             })
         })
-        chatGroupUsers.push(this.chatGroupUserRepository.create({
+        chatGroupUser.push(this.chatGroupUserRepository.create({
             user: auth_user,
             chatGroup: savedGroup,
         }))
-        await this.chatGroupUserRepository.save(chatGroupUsers)
+        await this.chatGroupUserRepository.save(chatGroupUser)
         return { success: true };
     }
 

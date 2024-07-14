@@ -1,4 +1,4 @@
-import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from "typeorm";
+import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 import { CommunityForum } from "./community-forum.entity";
 import { CommunitySubforum } from "./community-subforum.entity";

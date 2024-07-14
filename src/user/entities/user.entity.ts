@@ -4,6 +4,8 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, One
 import { Roles } from "./roles.entity";
 import { ChatGroupUser } from "src/chats/entities/chat-group-user.entity";
 import { DiaryUser } from "src/diary/entities/diary-user.entity";
+import { NotificationEntity } from "src/notification/entities/notification.entity";
+import { ChatGroup } from "src/chats/entities/chat-group.entity";
 
 @Entity()
 export class User {
@@ -70,7 +72,6 @@ export class User {
     role: Roles | null;
 
     @OneToOne(() => Settings, settings => settings.user, { cascade: false, nullable: true, eager: false })
-    @JoinColumn()
     settings: Settings | null;
 
     @Column({ nullable: true, name: 'guardian_id' })

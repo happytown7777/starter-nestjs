@@ -25,10 +25,11 @@ export class ReminderService {
         const settings = await this.settingsRepository.find({ where: { allowReminder: true } });
         for (let i = 0; i < settings.length; i++) {
             if (settings[i]?.allowEveryonePost && settings[i]?.allowReminder) {
-                const todayDiary = await this.diaryRepository.count({ where: { date: new Date(), diaryUser: { userId: settings[i].userId } } });
+                const todayDiary = await this.diaryRepository.count({ where: { date: new Date(), userId: settings[i].userId } });
                 if (todayDiary == 0) {
                     await this.notificationRepository.save({
                         fromId: settings[i].userId,
+                        fromUser: settings[i],
                         toId: settings[i].userId,
                         type: 'comment',
                         content: 'Just a friendly reminder to capture your thoughts and experiences in your diary today. Your insights are valuable!',

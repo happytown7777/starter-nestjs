@@ -1,4 +1,4 @@
-import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from "typeorm";
+import { Column, ManyToOne, Entity, PrimaryGeneratedColumn, JoinColumn, Relation, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 import { CommunityForum } from "./community-forum.entity";
 import { CommunityThread } from "./community-thread.entity";
@@ -20,7 +20,7 @@ export class CommunitySubforum {
     @ManyToOne(() => CommunityForum, { cascade: false, nullable: false, eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'forum_id' })
     forum: CommunityForum;
-    
+
     @OneToMany(() => CommunityThread, thread => thread.subforum, { cascade: false, nullable: true, eager: false })
     threads: CommunityThread[];
 

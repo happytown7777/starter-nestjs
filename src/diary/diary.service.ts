@@ -109,12 +109,12 @@ export class DiaryService {
                 userId: auth_user.id,
             });
             const savedDiary = await this.diaryRepository.save(diaryBody);
+            
             const diaryUsers = [];
             diaryUsers.push(this.diaryUserRepository.create({
                 user: auth_user,
                 diary: savedDiary,
             }))
-
             await this.diaryUserRepository.save(diaryUsers);
 
             const familyMemebers = await this.userRepository.find({ where: { familyId: auth_user.familyId, id: Not(auth_user.id) } });
@@ -123,7 +123,9 @@ export class DiaryService {
                 console.log(settings, member)
                 if (settings?.allowEveryonePost && settings?.allowFamilyNotification) {
                     this.notificationRepository.save({
-                        userId: member.id,
+                        fromId: member.id,
+                        fromUser: member,
+                        toId: auth_user.id,
                         type: 'diary',
                         title: `${auth_user.customName ?? auth_user.firstName} posted new diary`,
                         content: `${auth_user.customName ?? auth_user.firstName} added new diary <b>${diary.title}</b>`,
@@ -142,15 +144,17 @@ export class DiaryService {
     }
 
 
-    async editDiary(diary: any, user: User): Promise<any> {
+    async editDiary(diary: any, auth_user: User): Promise<any> {
         try {
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
                 title: diary['title'],
                 content: diary['content'],
+                date: diary['date'],
                 imageUrl: diary['imageUrl'],
-                user: user,
                 diaryTopic: topic,
+                isSecret: diary['isSecret'],
+                userId: auth_user.id,
             }
             if (topic) {
                 this.diaryRepository.update({ id: diary['id'] }, diaryBody);
@@ -163,7 +167,6 @@ export class DiaryService {
 
 
     async updateDiary(body: any, userId: number): Promise<any> {
-        console.log("=============updateDiary=========", body)
         const diary = await this.diaryRepository.findOne({ where: { id: body.id } });
         if (!diary) {
             return { error: 'Diary not found' };
@@ -186,7 +189,7 @@ export class DiaryService {
     }
 
     async deleteDiary(id: any, userId: number): Promise<{ error?: string }> {
-        const exist = await this.diaryRepository.findOne({ where: { id, diaryUser: { userId } } });
+        const exist = await this.diaryRepository.findOne({ where: { id, userId } });
         if (!exist) {
             return { error: "No matching diary. Please check details." };
         }
@@ -211,7 +214,9 @@ export class DiaryService {
                 const settings = await this.settingsRepository.findOne({ where: { userId: diaryUser.userId } });
                 if (settings?.allowEveryonePost && settings?.allowMessageNotification) {
                     await this.notificationRepository.save({
-                        userId: diaryUser.userId,
+                        fromId: diaryUser.userId,
+                        fromUser: diaryUser,
+                        toId: userId,
                         type: 'comment',
                         title: `Commented to your diary`,
                         content: `${diaryUser.user.customName ?? diaryUser.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,

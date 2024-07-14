@@ -11,14 +11,14 @@ export class DiaryUser {
   @Column({ name: 'diary_id' })
   diaryId: number;
 
-  @ManyToOne(() => Diary, diary => diary.diaryUser, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Diary, diary => diary.diaryUser, { cascade: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'diary_id' })
   diary: Diary;
-  
+
   @Column({ name: 'user_id' })
   userId: number;
 
-  @ManyToOne(() => User, user => user.diaryUser, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.diaryUser, { cascade: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

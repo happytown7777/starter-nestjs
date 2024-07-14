@@ -69,8 +69,9 @@ export class UserService {
             familyId: user.familyId,
             roleId: userRole.id,
         }
+        
         const newUser = await this.usersRepository.save(reqBody);
-        await this.settingsRepository.upsert({ userId: newUser.id }, ['userId']);
+        await this.settingsRepository.upsert({ userId: newUser.id, user: newUser }, ['userId']);
         return { user: newUser };
     }
 
