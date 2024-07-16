@@ -16,8 +16,10 @@ import { Chat } from '../chats/entities/chat.entity';
 @Injectable()
 @WebSocketGateway({ cors: true })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private chatService: ChatsService) {
-  }
+  constructor(
+    private chatService: ChatsService,
+
+  ) { }
 
   @WebSocketServer()
   server: Server;
@@ -41,19 +43,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('message')
-  async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: Chat) {
+  async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
     const msgData = await this.chatService.sendMessage(data);
     this.emitEvents(data.fromId, 'msgSent', msgData);
     if (data.isGroup) {
       const users = await this.chatService.getGroupUsers(data.toId);
       for (const user of users) {
         if (user.id != data.fromId) {
+          await this.chatService.saveChatNotificaton(data, user.id);
           this.emitEvents(user.id, 'message', msgData);
         }
       }
     }
     else {
+      await this.chatService.saveChatNotificaton(data, data.toId);
       this.emitEvents(data.toId, 'message', msgData);
+
     }
   }
 
@@ -79,6 +84,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     fromId: number
     isGroup: boolean
   }) {
+    console.log(data.toId, data.fromId, data.isGroup)
     await this.chatService.readMessage(data.toId, data.fromId, data.isGroup);
   }
 

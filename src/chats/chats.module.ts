@@ -8,9 +8,10 @@ import { Chat } from './entities/chat.entity';
 import { SocketModule } from 'src/socket/socket.module';
 import { ChatGroupUser } from './entities/chat-group-user.entity';
 import { ChatSetting } from './entities/chat-setting.entity';
+import { NotificationEntity } from 'src/notification/entities/notification.entity';
 
 @Module({
-  imports: [SocketModule, TypeOrmModule.forFeature([User, ChatGroup, ChatGroupUser, Chat, ChatSetting])],
+  imports: [SocketModule, TypeOrmModule.forFeature([User, ChatGroup, ChatGroupUser, Chat, ChatSetting, NotificationEntity])],
   providers: [ChatsService],
   controllers: [ChatsController],
 })

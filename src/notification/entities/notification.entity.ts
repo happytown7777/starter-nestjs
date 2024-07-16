@@ -16,6 +16,9 @@ export class NotificationEntity {
     isRead: boolean;
 
     @Column('longtext')
+    title: string;
+
+    @Column('longtext')
     content: string;
 
     @Column({ name: 'from_id', nullable: true })

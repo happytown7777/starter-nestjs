@@ -8,12 +8,14 @@ import { ChatChannel } from './entities/chat-channel.entity';
 import { Chat } from './entities/chat.entity';
 import { ChatGroupUser } from './entities/chat-group-user.entity';
 import { ChatSetting } from './entities/chat-setting.entity';
+import { NotificationEntity } from 'src/notification/entities/notification.entity';
 
 
 @Injectable()
 export class ChatsService {
     constructor(
         @InjectRepository(Chat) private chatRepository: Repository<Chat>,
+        @InjectRepository(NotificationEntity) private notificationRepository: Repository<NotificationEntity>,
         @InjectRepository(ChatGroup) private chatGroupRepository: Repository<ChatGroup>,
         @InjectRepository(ChatGroupUser) private chatGroupUserRepository: Repository<ChatGroupUser>,
         @InjectRepository(User) private userRepository: Repository<User>,
@@ -177,6 +179,19 @@ export class ChatsService {
             from: await this.userRepository.findOne({ where: { id: msg.fromId } }),
             to: await this.userRepository.findOne({ where: { id: msg.toId } }),
         };
+    }
+
+    async saveChatNotificaton(msg: any, toId: number): Promise<any> {
+        console.log("===========saveChatNotificaton========", msg)
+        await this.notificationRepository.save({
+            fromId: msg.fromId,
+            fromUser: msg.fromUser,
+            toId: toId,
+            type: 'new',
+            title: `${msg.fromUser.customName ?? msg.fromUser.firstName}`,
+            content: `Received new message from ${msg.fromUser.customName ?? msg.fromUser.firstName}`,
+            url: `/message/view/${msg.fromId}`,
+        });
     }
 
     async deleteMessage(link: string): Promise<{ error?: string }> {

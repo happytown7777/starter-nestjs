@@ -14,6 +14,7 @@ import { DiaryUser } from './entities/diary-user.entity';
 @Injectable()
 export class DiaryService {
     constructor(
+        private socketGateway: SocketGateway,
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(DiaryTopic) private diaryTopicRepository: Repository<DiaryTopic>,
         @InjectRepository(DiaryLike) private diaryLikeRepository: Repository<DiaryLike>,
@@ -22,7 +23,6 @@ export class DiaryService {
         @InjectRepository(DiaryComment) private diaryCommentRepository: Repository<DiaryComment>,
         @InjectRepository(NotificationEntity) private notificationRepository: Repository<NotificationEntity>,
         @InjectRepository(Settings) private settingsRepository: Repository<Settings>,
-        private socketGateway: SocketGateway,
     ) { }
 
     async getAllTopics(familyId: number): Promise<any[]> {
@@ -50,7 +50,7 @@ export class DiaryService {
         return topics;
     }
 
-    async getDiaryList(user: any, param: any = {}): Promise<Diary[]> {
+    async getDiaryList(user: User, param: any = {}): Promise<Diary[]> {
         let query = this.diaryRepository.createQueryBuilder('diary')
             .leftJoinAndSelect('diary.diaryTopic', 'diaryTopic')
             .leftJoinAndSelect('diary.likes', 'likes')
@@ -86,7 +86,7 @@ export class DiaryService {
 
     async getDiaryData(diaryId: any, userId: number): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
-        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser', 'user'] });
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
         const exist = result.diaryUser.find(diaryUser => diaryUser.userId === user.id);
         if (exist) {
             return { diary: result };
@@ -97,6 +97,7 @@ export class DiaryService {
 
     async postDiary(diary: any, auth_user: User): Promise<any> {
         try {
+            console.log("==============postDiary=============", diary)
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             if (!topic) return { success: false, error: 'Topic does not exist.' }
             const diaryBody = this.diaryRepository.create({
@@ -109,7 +110,7 @@ export class DiaryService {
                 userId: auth_user.id,
             });
             const savedDiary = await this.diaryRepository.save(diaryBody);
-            
+
             const diaryUsers = [];
             diaryUsers.push(this.diaryUserRepository.create({
                 user: auth_user,
@@ -123,17 +124,17 @@ export class DiaryService {
                 console.log(settings, member)
                 if (settings?.allowEveryonePost && settings?.allowFamilyNotification) {
                     this.notificationRepository.save({
-                        fromId: member.id,
-                        fromUser: member,
-                        toId: auth_user.id,
-                        type: 'diary',
-                        title: `${auth_user.customName ?? auth_user.firstName} posted new diary`,
-                        content: `${auth_user.customName ?? auth_user.firstName} added new diary <b>${diary.title}</b>`,
-                        url: `/diary/view/${diary.id}`,
+                        fromId: auth_user.id,
+                        fromUser: auth_user,
+                        toId: member.id,
+                        type: 'post',
+                        title: `${auth_user.customName ?? auth_user.firstName}`,
+                        content: 'Posted a new diary.',
+                        url: `/diary/view/${savedDiary.id}`,
                     });
                     this.socketGateway.emitEvents(member.id.toString(), 'notification', {
-                        title: `${auth_user.customName ?? auth_user.firstName} added new diary`,
-                        content: `${auth_user.customName ?? auth_user.firstName} added new diary ${diary.title}`
+                        title: `${auth_user.customName ?? auth_user.firstName}`,
+                        content: 'Posted a new diary',
                     });
                 }
             });
@@ -144,7 +145,7 @@ export class DiaryService {
     }
 
 
-    async editDiary(diary: any, auth_user: User): Promise<any> {
+    async editDiary(diary: any, userId: number): Promise<any> {
         try {
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             const diaryBody = {
@@ -154,7 +155,7 @@ export class DiaryService {
                 imageUrl: diary['imageUrl'],
                 diaryTopic: topic,
                 isSecret: diary['isSecret'],
-                userId: auth_user.id,
+                userId: userId,
             }
             if (topic) {
                 this.diaryRepository.update({ id: diary['id'] }, diaryBody);
@@ -178,62 +179,41 @@ export class DiaryService {
     }
 
 
-    async likeDiary(diaryId: any, userId: number): Promise<void> {
-        const exist = await this.diaryLikeRepository.findOne({ where: { userId, diaryId } });
+    async likeDiary(diaryId: any, auth_user: User): Promise<void> {
+        const exist = await this.diaryLikeRepository.findOne({ where: { userId: auth_user.id, diaryId } });
         if (exist) {
-            await this.diaryLikeRepository.delete({ userId, diaryId });
+            await this.diaryLikeRepository.delete({ userId: auth_user.id, diaryId });
         }
         else {
-            await this.diaryLikeRepository.save({ userId, diaryId });
+            await this.diaryLikeRepository.save({ userId: auth_user.id, diaryId });
+            await this.emitDiaryNotification(diaryId, 'like', 'Liked your the post you shared', auth_user);
         }
     }
 
-    async deleteDiary(id: any, userId: number): Promise<{ error?: string }> {
-        const exist = await this.diaryRepository.findOne({ where: { id, userId } });
+    async deleteDiary(id: any, auth_user: User): Promise<{ error?: string }> {
+        const exist = await this.diaryRepository.findOne({ where: { id, userId: auth_user.id } });
         if (!exist) {
             return { error: "No matching diary. Please check details." };
         }
         await this.diaryLikeRepository.delete({ diaryId: id });
-        await this.diaryRepository.delete({ id, userId });
+        await this.diaryRepository.delete({ id, userId: auth_user.id });
         return {};
     }
 
-    async addDiaryComment(id: any, userId: number, parentId: number, comment: string): Promise<{ error?: string }> {
+    async addDiaryComment(diaryId: number, auth_user: User, parentId: number, comment: string): Promise<{ error?: string }> {
         await this.diaryCommentRepository.save({
-            userId,
-            diaryId: id,
+            userId: auth_user.id,
+            diaryId: diaryId,
             parentId,
             comment,
         });
-        const diary = await this.diaryRepository.findOne({ where: { id }, relations: ['diaryUser', 'diaryUser.user'] });
-        if (!diary) {
-            return { error: 'Diary not found' };
-        }
-        for (const diaryUser of diary.diaryUser) {
-            if (diaryUser.user.id !== userId) {
-                const settings = await this.settingsRepository.findOne({ where: { userId: diaryUser.userId } });
-                if (settings?.allowEveryonePost && settings?.allowMessageNotification) {
-                    await this.notificationRepository.save({
-                        fromId: diaryUser.userId,
-                        fromUser: diaryUser,
-                        toId: userId,
-                        type: 'comment',
-                        title: `Commented to your diary`,
-                        content: `${diaryUser.user.customName ?? diaryUser.user.firstName} commented on your diary <b>${diary.title}</b>. Comment is <i>${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}</i>`,
-                        url: `/diary/view/${diary.id}`,
-                    });
-                    this.socketGateway.emitEvents(diaryUser.userId.toString(), 'notification', {
-                        title: `${diaryUser.user.customName ?? diaryUser.user.firstName} commented on your diary`,
-                        content: `${diaryUser.user.customName ?? diaryUser.user.firstName} commented on your diary ${diary.title}. Comment is ${comment.slice(0, 25)}${comment.length > 25 ? '...' : ''}`
-                    });
-                }
-            }
-        }
+
+        await this.emitDiaryNotification(diaryId, 'comment', 'Commented on a diary', auth_user);
         return { error: '' }
     }
 
-    async removeDiaryComment(id: number, userId: number): Promise<{ error?: string }> {
-        let diaryComment = await this.diaryCommentRepository.findOne({ where: { id, userId } });
+    async removeDiaryComment(id: number, auth_user: User): Promise<{ error?: string }> {
+        let diaryComment = await this.diaryCommentRepository.findOne({ where: { id, userId: auth_user.id } });
 
         if (!diaryComment) {
             return { error: 'No matching comment. Please check details.' }
@@ -301,6 +281,34 @@ export class DiaryService {
         if (newDiaryUsers.length > 0) {
             await this.diaryUserRepository.save(newDiaryUsers)
         }
+
+        await this.emitDiaryNotification(body.diaryId, 'share', 'Shared a diary externally', auth_user);
         return { success: true };
+    }
+
+    async emitDiaryNotification(diaryId: number, type: string, content: string, auth_user: User): Promise<any> {
+        const diary = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryUser', 'diaryUser.user'] });
+        if (!diary) {
+            return { error: 'Diary not found' };
+        }
+        for (const diaryUser of diary.diaryUser) {
+            if (diaryUser.userId !== auth_user.id) {
+                const settings = await this.settingsRepository.findOne({ where: { userId: diaryUser.userId } });
+                if (settings?.allowEveryonePost && settings?.allowMessageNotification) {
+                    await this.notificationRepository.save({
+                        fromId: auth_user.id,
+                        fromUser: auth_user,
+                        toId: diaryUser.userId,
+                        type: type,
+                        title: `${auth_user.customName ?? auth_user.firstName}`,
+                        content: content,
+                    });
+                    this.socketGateway.emitEvents(diaryUser.userId.toString(), 'notification', {
+                        title: `${auth_user.customName ?? auth_user.firstName}`,
+                        content: content,
+                    });
+                }
+            }
+        }
     }
 }

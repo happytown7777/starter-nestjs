@@ -7,13 +7,14 @@ import { Chat } from 'src/chats/entities/chat.entity';
 import { ChatGroup } from 'src/chats/entities/chat-group.entity';
 import { ChatGroupUser } from 'src/chats/entities/chat-group-user.entity';
 import { ChatSetting } from 'src/chats/entities/chat-setting.entity';
+import { NotificationEntity } from 'src/notification/entities/notification.entity';
 
 @Global()
 @Module({
     providers: [SocketGateway, ChatsService],
     exports: [SocketGateway],
     imports: [
-        TypeOrmModule.forFeature([User, Chat, ChatGroup, ChatGroupUser, ChatSetting]),
+        TypeOrmModule.forFeature([User, Chat, ChatGroup, ChatGroupUser, ChatSetting, NotificationEntity]),
     ]
 })
 export class SocketModule { }
