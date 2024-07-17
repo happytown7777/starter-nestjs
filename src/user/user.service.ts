@@ -33,13 +33,8 @@ export class UserService {
     ) { }
 
     async signup(user: any): Promise<any> {
-        console.log("======signUp_user=====", user);
         let error = {};
-        if (await this.usersRepository.exist({
-            where: {
-                email: user.email,
-            }
-        })) {
+        if (await this.usersRepository.exist({ where: { email: user.email } })) {
             error["email"] = "Email already exists.";
         }
         if (Object.keys(error).length > 0) {
@@ -47,8 +42,8 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
-        const isGuardian = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
-        const userRole = await this.rolesRepository.findOne({ where: { role: isGuardian ? 'Parent' : 'Child' } });
+        const isParent = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
+        const userRole = await this.rolesRepository.findOne({ where: { role: isParent ? 'Parent' : 'Child' } });
 
         if (!user.isFindFamily && user.familyName) {
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
@@ -69,14 +64,14 @@ export class UserService {
             familyId: user.familyId,
             roleId: userRole.id,
         }
-        
+
         const newUser = await this.usersRepository.save(reqBody);
         await this.settingsRepository.upsert({ userId: newUser.id, user: newUser }, ['userId']);
         return { user: newUser };
     }
 
     async signin(user: User, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'role', 'settings', 'family.members.role'] });
+        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'settings'] });
         if (foundUser) {
             const { password } = foundUser;
             if (await bcrypt.compare(user.password, password)) {
@@ -213,6 +208,25 @@ export class UserService {
         return { success: true, body: body };
     }
 
+
+    async checkGuardian(body: any): Promise<any> {
+        const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
+        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
+        if (newUser) {
+            // const age = moment().diff(newUser.birthdate, 'years');
+            // if (age > 16) {
+            //     return { guardianId: newUser.id };
+            // }
+            // else {
+            //     return { error: "This account is not old enough to be a guardian." };
+            // }
+            return { guardianId: newUser.id, family: newUser.family };
+        }
+        else {
+            return { error: "No matching Guardian account. Please check details." };
+        }
+    }
+
     async qrcode(fileBuffer: Buffer): Promise<any> {
         try {
             const image = await Jimp.read(fileBuffer);
@@ -234,7 +248,7 @@ export class UserService {
     }
 
     async getOne(email: string): Promise<User> {
-        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'role', 'settings', 'family.members.role'] });
+        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'settings'] });
     }
 
     async userEmotion(userId: number): Promise<string> {

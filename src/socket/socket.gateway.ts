@@ -98,7 +98,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.leave(room);
   }
 
-  addSocket(userId, socket) {
+  addSocket(userId: string, socket: any) {
     const sockets: any[] = this.getSockets(userId);
     if (sockets.indexOf(socket) == -1) {
       sockets.push(socket);
@@ -107,11 +107,11 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
 
-  getSockets<Socket>(userId) {
+  getSockets<Socket>(userId: string) {
     return this.socketMap[`${userId}`] || [];
   }
 
-  removeSocket(userId, socket) {
+  removeSocket(userId: string, socket: any) {
     const sockets: any[] = this.getSockets(userId);
     const index = sockets.indexOf(socket);
     if (index != -1) {
@@ -120,7 +120,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.socketMap[`${userId}`] = sockets;
   }
 
-  emitEvents(userId, msg, obj) {
+  emitEvents(userId: any, msg: any, obj: any) {
     const sockets: Socket[] = this.getSockets(userId);
     console.log(userId, msg, obj, sockets.length)
     for (const socket of sockets) {
@@ -128,7 +128,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  emitEventToAllUsers(msg, obj) {
+  emitEventToAllUsers(msg: any, obj: any) {
     for (const userId in this.socketMap) {
       this.emitEvents(userId, msg, obj);
     }

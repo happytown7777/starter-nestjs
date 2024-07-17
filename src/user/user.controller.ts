@@ -69,6 +69,12 @@ export class UserController {
         return response.status(HttpStatus.OK).json(res)
     }
 
+    @Post('/check-guardian')
+    async CheckGuardian(@Res() response, @Body() body) {
+        const res = await this.userServerice.checkGuardian(body);
+        return response.status(HttpStatus.OK).json(res)
+    }
+
     @Delete('/delete/:userId')
     async removeDiaryComment(@Param('userId') userId: string, @Res() response, @Req() req) {
         const result = await this.userServerice.deleteUser(userId);

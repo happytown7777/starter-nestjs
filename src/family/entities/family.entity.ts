@@ -15,7 +15,7 @@ export class Family {
     @OneToMany(() => User, user => user.family, { eager: true })
     members: User[];
 
-    @OneToOne(() => User, user => user.family, { cascade: false, nullable: true, eager: false, onDelete: 'CASCADE' })
+    @OneToOne(() => User, user => user.family, { cascade: false, nullable: true, eager: true, onDelete: 'CASCADE' })
     owner: User;
 
     @Column({name: 'image_url', length: 8192, nullable: true })
