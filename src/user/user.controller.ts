@@ -89,7 +89,7 @@ export class UserController {
 
     @Put('/profile')
     async UpdateProfile(@Res() response, @Body() body, @Req() req) {
-        const res = await this.userServerice.updateProfile(body, req.user.id);
+        const res = await this.userServerice.updateProfile(body);
         return response.status(HttpStatus.OK).json(res);
     }
 

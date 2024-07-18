@@ -42,12 +42,15 @@ export class UserService {
         }
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
-        const isParent = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
-        const userRole = await this.rolesRepository.findOne({ where: { role: isParent ? 'Parent' : 'Child' } });
-
+        let userRole: Roles;
+        
         if (!user.isFindFamily && user.familyName) {
+            userRole = await this.rolesRepository.findOne({ where: { role: 'Admin' } });
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
             user.familyId = newFamily.id;
+        } else {
+            const isParent = moment.utc().diff(moment.utc(user.birthdate), 'years') >= 17;
+            userRole = await this.rolesRepository.findOne({ where: { role: isParent ? 'Parent' : 'Child' } });
         }
 
         const reqBody = {
@@ -200,10 +203,11 @@ export class UserService {
         return { error: 'Member not found' }
     }
 
-    async updateProfile(body, user_id): Promise<any> {
-        const user = await this.usersRepository.findOne({ where: { id: user_id } });
+    async updateProfile(body: any): Promise<any> {
+        const user = await this.usersRepository.findOne({ where: { id: body.id } });
+        console.log("======", body, user)
         if (user) {
-            await this.usersRepository.update({ id: user_id }, body);
+            await this.usersRepository.update({ id: body.id }, body);
         }
         return { success: true, body: body };
     }
