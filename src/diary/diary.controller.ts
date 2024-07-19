@@ -8,7 +8,7 @@ export class DiaryController {
 
     @Post('topics')
     async GetTopics(@Res() response, @Req() req) {
-        const topics = await this.diaryService.getAllTopics(req?.user?.family?.id);
+        const topics = await this.diaryService.getAllTopics(req?.user?.familyId);
         return response.status(HttpStatus.OK).json({ topics });
     }
 
