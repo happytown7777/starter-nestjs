@@ -77,9 +77,9 @@ export class User {
     @Column({ nullable: true, name: 'guardian_id' })
     guardianId: number | null;
 
-    @ManyToOne(() => User, { nullable: true, eager: false })
+    @ManyToOne(() => User, user => user.id, { nullable: true, eager: false, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'guardian_id' })
-    gurdian: User | null;
+    guardian: User | null;
 
     @OneToMany(() => ChatGroupUser, chatGroupUser => chatGroupUser.user)
     chatGroupUser: ChatGroupUser[];

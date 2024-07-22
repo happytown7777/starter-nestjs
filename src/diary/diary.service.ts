@@ -26,7 +26,6 @@ export class DiaryService {
     ) { }
 
     async getAllTopics(familyId: number): Promise<any[]> {
-        console.log("======getAllTopics======", familyId)
         const diaryTopics = await this.diaryTopicRepository.find({});
 
         // Fetch counts of Diaries for each DiaryTopic
@@ -86,7 +85,6 @@ export class DiaryService {
     }
 
     async getDiaryData(diaryId: any, userId: number): Promise<any> {
-        console.log("======getDiaryData======", diaryId)
         const user = await this.userRepository.findOne({ where: { id: userId } });
         const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
         const exist = result.diaryUser.find(diaryUser => diaryUser.userId === user.id);

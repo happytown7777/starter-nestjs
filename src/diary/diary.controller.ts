@@ -6,26 +6,31 @@ import { User } from 'src/user/entities/user.entity';
 export class DiaryController {
     constructor(private readonly diaryService: DiaryService) { }
 
-    @Post('topics')
+    @Get('topics')
     async GetTopics(@Res() response, @Req() req) {
+        console.log("===========GetTopics", req.user)
         const topics = await this.diaryService.getAllTopics(req?.user?.familyId);
+        console.log("================topics=============", topics)
         return response.status(HttpStatus.OK).json({ topics });
     }
 
     @Post('all')
     async GetDiaryList(@Res() response, @Req() req, @Body() body: any) {
+        console.log("===========GetDiaryList", req.user)
         const diaryList = await this.diaryService.getDiaryList(req.user, body);
         return response.status(HttpStatus.OK).json({ diaryList });
     }
 
     @Get(':id')
     async GetDiaryData(@Res() response, @Param('id') id: string, @Req() req) {
+        console.log("===========GetDiaryData", req.user)
         const res = await this.diaryService.getDiaryData(id, req.user.id);
         return response.status(HttpStatus.OK).json(res);
     }
 
     @Post('post')
     async postDiary(@Res() response, @Body() body, @Req() req) {
+        console.log("===========postDiary", req.user)
         const res = await this.diaryService.postDiary(body, req.user);
         return response.status(HttpStatus.OK).json(res);
     }
