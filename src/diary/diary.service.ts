@@ -97,7 +97,6 @@ export class DiaryService {
 
     async postDiary(diary: any, auth_user: User): Promise<any> {
         try {
-            console.log("==============postDiary=============", diary)
             const topic = await this.diaryTopicRepository.findOneBy({ id: parseInt(diary['topicId']) });
             if (!topic) return { success: false, error: 'Topic does not exist.' }
             const diaryBody = this.diaryRepository.create({
@@ -121,7 +120,6 @@ export class DiaryService {
             const familyMemebers = await this.userRepository.find({ where: { familyId: auth_user.familyId, id: Not(auth_user.id) } });
             familyMemebers.forEach(async member => {
                 const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
-                console.log(settings, member)
                 if (settings?.allowEveryonePost && settings?.allowFamilyNotification) {
                     this.notificationRepository.save({
                         fromId: auth_user.id,
