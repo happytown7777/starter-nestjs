@@ -19,7 +19,7 @@ export class FamilyService {
     async createFamily(body: any): Promise<any> {
         try {
             const newFamily = await this.familyRepository.save({ name: body.name, description: body.description });
-            let existUser = await this.usersRepository.findOne({ where: { id: body.id } });
+            let existUser = await this.usersRepository.findOne({ where: { id: body.id, deletedAt: null } });
             existUser.familyId = newFamily.id;
             await this.usersRepository.save(existUser);
             return { user: existUser, errors: [] };
@@ -30,7 +30,11 @@ export class FamilyService {
     }
 
     async checkFamily(body: any): Promise<any> {
-        const foundFamily = await this.familyRepository.findOne({ where: body, relations: ['owner'] });
+        const foundFamily = await this.familyRepository.findOne({
+            where: { ...body, deletedAt: null },
+            relations: ['owner']
+        });
+
         if (foundFamily) {
             return { family: foundFamily };
         }
@@ -41,7 +45,7 @@ export class FamilyService {
 
     async updateFamily(body: any): Promise<any> {
         try {
-            const family = await this.familyRepository.findOneBy({ id: body.id });
+            const family = await this.familyRepository.findOneBy({ id: body.id, deletedAt: null });
             if (!family) {
                 return new HttpException('Family not found', HttpStatus.UNAUTHORIZED)
             }
@@ -55,7 +59,11 @@ export class FamilyService {
 
     async findFamily(body: any): Promise<any> {
         try {
-            const familyList = await this.familyRepository.find({ where: { name: Like(`%${body['name']}%`) }, relations: ['members'] });
+            const familyList = await this.familyRepository.find({
+                where: { name: Like(`%${body['name']}%`), deletedAt: null },
+                relations: ['members']
+            });
+
             return { familyList: familyList };
         }
         catch (e) {
@@ -65,7 +73,7 @@ export class FamilyService {
 
     async enterFamily({ user_id, family_id }): Promise<any> {
         try {
-            let newUser = await this.usersRepository.findOne({ where: { id: user_id } });
+            let newUser = await this.usersRepository.findOne({ where: { id: user_id, deletedAt: null } });
             newUser.familyId = family_id;
             await this.usersRepository.save(newUser);
             return { user: newUser };
@@ -77,7 +85,11 @@ export class FamilyService {
 
     async getMembers(familyId): Promise<any> {
         try {
-            const memberList: Family = await this.familyRepository.findOne({ where: { id: familyId }, relations: ['members'] });
+            const memberList: Family = await this.familyRepository.findOne({
+                where: { id: familyId, deletedAt: null },
+                relations: ['members']
+            });
+
             return { members: memberList.members };
         }
         catch (e) {
@@ -87,7 +99,7 @@ export class FamilyService {
 
     async findMember(email): Promise<any> {
         try {
-            const members = await this.usersRepository.find({ where: { email: Like(`%${email}%`) } });
+            const members = await this.usersRepository.find({ where: { email: Like(`%${email}%`), deletedAt: null } });
             return { members };
         }
         catch (e) {

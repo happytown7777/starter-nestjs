@@ -38,7 +38,7 @@ export class SeedService {
         for (const user of users) {
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(user.password, salt);
-            const existingUser = await this.userRepository.findOne({ where: { email: user.email } });
+            const existingUser = await this.userRepository.findOne({ where: { email: user.email, deletedAt: null } });
             if (!existingUser) {
                 await this.userRepository.save({
                     ...user,
@@ -95,7 +95,7 @@ export class SeedService {
         ];
 
         for (const family of families) {
-            const existingFamily = await this.familyRepository.findOne({ where: { name: family.name } });
+            const existingFamily = await this.familyRepository.findOne({ where: { name: family.name, deletedAt: null } });
             if (!existingFamily) {
                 await this.familyRepository.save(family);
             }

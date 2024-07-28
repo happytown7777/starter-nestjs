@@ -27,8 +27,8 @@ export class ChatsController {
     }
 
     @Delete('/channel/delete/:id')
-    async DeleteChannel(@Param('id') id: number, @Req() req, @Res() response) {
-        const result = await this.chatsService.deleteChannel(id, req.user.id);
+    async DeleteChannelUser(@Param('id') id: number, @Req() req, @Res() response) {
+        const result = await this.chatsService.deleteChannelUser(id, req.user.id);
         return response.status(HttpStatus.OK).json(result)
     }
 

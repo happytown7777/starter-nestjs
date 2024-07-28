@@ -1,6 +1,6 @@
 import { Family } from "src/family/entities/family.entity";
 import { Settings } from "src/settings/entities/settings.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Roles } from "./roles.entity";
 import { ChatGroupUser } from "src/chats/entities/chat-group-user.entity";
 import { DiaryUser } from "src/diary/entities/diary-user.entity";
@@ -92,4 +92,7 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @DeleteDateColumn({ nullable: true })
+    deletedAt: Date | null;
 }

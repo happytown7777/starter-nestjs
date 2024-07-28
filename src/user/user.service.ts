@@ -34,7 +34,7 @@ export class UserService {
 
     async signup(user: any): Promise<any> {
         let error = {};
-        if (await this.usersRepository.exist({ where: { email: user.email } })) {
+        if (await this.usersRepository.exist({ where: { email: user.email, deletedAt: null } })) {
             error["email"] = "Email already exists.";
         }
         if (Object.keys(error).length > 0) {
@@ -43,7 +43,7 @@ export class UserService {
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
         let userRole: Roles;
-        
+
         if (!user.isFindFamily && user.familyName) {
             userRole = await this.rolesRepository.findOne({ where: { role: 'Admin' } });
             const newFamily = await this.familyRepository.save({ name: user.familyName, description: `${user.firstName} ${user.lastName}'s family` });
@@ -74,7 +74,7 @@ export class UserService {
     }
 
     async signin(user: User, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email: user.email }, relations: ['family', 'settings'] });
+        const foundUser = await this.usersRepository.findOne({ where: { email: user.email, deletedAt: null }, relations: ['family', 'settings'] });
         if (foundUser) {
             const { password } = foundUser;
             if (await bcrypt.compare(user.password, password)) {
@@ -99,7 +99,7 @@ export class UserService {
         });
         // console.log(ticket.getPayload());
         const payload = ticket.getPayload();
-        const foundUser = await this.usersRepository.findOne({ where: { email: payload.email } });
+        const foundUser = await this.usersRepository.findOne({ where: { email: payload.email, deletedAt: null } });
         if (foundUser) {
             const payload = { email: foundUser.email, firstName: foundUser.firstName, lastName: foundUser.lastName, avatar: foundUser.avatar };
             return {
@@ -111,7 +111,7 @@ export class UserService {
     }
 
     async resetPassword(email: string, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email } });
+        const foundUser = await this.usersRepository.findOne({ where: { email, deletedAt: null } });
         if (foundUser) {
             const token = jwt.sign({ email }, {
                 secret: "haruhana",
@@ -172,7 +172,7 @@ export class UserService {
     }
 
     async updatePassword(email: string, currentPassword: string, newPassword: string, jwt: JwtService): Promise<any> {
-        const foundUser = await this.usersRepository.findOne({ where: { email } });
+        const foundUser = await this.usersRepository.findOne({ where: { email, deletedAt: null } });
         console.log(email, currentPassword, newPassword, foundUser.password);
         if (foundUser) {
             const validPassword = await bcrypt.compare(currentPassword, foundUser.password);
@@ -195,16 +195,16 @@ export class UserService {
 
     async deleteUser(userId): Promise<{ error?: string }> {
         console.log("=====================userId", userId)
-        const foundUser = await this.usersRepository.findOne({ where: { id: userId } });
+        const foundUser = await this.usersRepository.findOne({ where: { id: userId, deletedAt: null } });
         if (foundUser) {
-            await this.usersRepository.delete({ id: userId });
+            await this.usersRepository.softDelete(foundUser);
             return { error: '' }
         }
         return { error: 'Member not found' }
     }
 
     async updateProfile(body: any): Promise<any> {
-        const user = await this.usersRepository.findOne({ where: { id: body.id } });
+        const user = await this.usersRepository.findOne({ where: { id: body.id, deletedAt: null } });
         console.log("======", body, user)
         if (user) {
             await this.usersRepository.update({ id: body.id }, body);
@@ -215,7 +215,7 @@ export class UserService {
 
     async checkGuardian(body: any): Promise<any> {
         const parentRole = await this.rolesRepository.findOne({ where: { role: 'Parent' } });
-        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id }, relations: ['family'] });
+        const newUser = await this.usersRepository.findOne({ where: { email: body.email, firstName: body.firstName, lastName: body.lastName, roleId: parentRole.id, deletedAt: null }, relations: ['family'] });
         if (newUser) {
             // const age = moment().diff(newUser.birthdate, 'years');
             // if (age > 16) {
@@ -252,7 +252,7 @@ export class UserService {
     }
 
     async getOne(email: string): Promise<User> {
-        return this.usersRepository.findOne({ where: { email: email }, relations: ['family', 'settings'] });
+        return this.usersRepository.findOne({ where: { email: email, deletedAt: null }, relations: ['family', 'settings'] });
     }
 
     async userEmotion(userId: number): Promise<string> {

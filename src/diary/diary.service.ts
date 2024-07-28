@@ -37,6 +37,7 @@ export class DiaryService {
                 .select('COUNT(diary.id)', 'count')
                 .where('user.familyId = :familyId', { familyId })
                 .andWhere('diary.diaryTopicId = :diaryTopicId', { diaryTopicId: diaryTopic.id })
+                .andWhere('user.deletedAt IS NULL')
                 .groupBy('diary.diaryTopicId')
                 .getRawOne();
 
@@ -57,7 +58,9 @@ export class DiaryService {
             .leftJoinAndSelect('diary.diaryUser', 'du')
             .leftJoinAndSelect('du.user', 'user')
             .loadRelationCountAndMap('diary.commentCount', 'diary.comments')
-            .where('user.id = :userId', { userId: user.id });
+            .where('user.id = :userId', { userId: user.id })
+            .andWhere('user.deletedAt IS NULL');
+
         if (param.searchKey) {
             // check title or content contains searchKey
             query = query.andWhere('(diary.title LIKE :searchKey OR diary.content LIKE :searchKey)', { searchKey: `%${param.searchKey}%` });
@@ -85,8 +88,8 @@ export class DiaryService {
     }
 
     async getDiaryData(diaryId: any, userId: number): Promise<any> {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
-        const result = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
+        const user = await this.userRepository.findOne({ where: { id: userId, deletedAt: null } });
+        const result = await this.diaryRepository.findOne({ where: { id: diaryId, deletedAt: null }, relations: ['diaryTopic', 'likes', 'comments', 'diaryUser'] });
         const exist = result.diaryUser.find(diaryUser => diaryUser.userId === user.id);
         if (exist) {
             return { diary: result };
@@ -117,7 +120,7 @@ export class DiaryService {
             }))
             await this.diaryUserRepository.save(diaryUsers);
 
-            const familyMemebers = await this.userRepository.find({ where: { familyId: auth_user.familyId, id: Not(auth_user.id) } });
+            const familyMemebers = await this.userRepository.find({ where: { familyId: auth_user.familyId, id: Not(auth_user.id), deletedAt: null } });
             familyMemebers.forEach(async member => {
                 const settings = await this.settingsRepository.findOne({ where: { userId: member.id } });
                 if (settings?.allowEveryonePost && settings?.allowFamilyNotification) {
@@ -166,7 +169,7 @@ export class DiaryService {
 
 
     async updateDiary(body: any, userId: number): Promise<any> {
-        const diary = await this.diaryRepository.findOne({ where: { id: body.id } });
+        const diary = await this.diaryRepository.findOne({ where: { id: body.id, deletedAt: null } });
         if (!diary) {
             return { error: 'Diary not found' };
         }
@@ -189,7 +192,7 @@ export class DiaryService {
     }
 
     async deleteDiary(id: any, auth_user: User): Promise<{ error?: string }> {
-        const exist = await this.diaryRepository.findOne({ where: { id, userId: auth_user.id } });
+        const exist = await this.diaryRepository.findOne({ where: { id, userId: auth_user.id, deletedAt: null } });
         if (!exist) {
             return { error: "No matching diary. Please check details." };
         }
@@ -230,7 +233,7 @@ export class DiaryService {
     }
 
     async getUserDiaryList(userId, familyId, param: any = {}): Promise<any> {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await this.userRepository.findOne({ where: { id: userId, deletedAt: null } });
         if (user.familyId !== familyId) {
             return { error: 'Not Allowed' }
         }
@@ -261,7 +264,7 @@ export class DiaryService {
 
 
     async shareDiary(auth_user: User, body: { diaryId: number, members: User[] }): Promise<any> {
-        const exist = await this.diaryRepository.findOne({ where: { id: body.diaryId } });
+        const exist = await this.diaryRepository.findOne({ where: { id: body.diaryId, deletedAt: null } });
         if (!exist) return { success: false, error: 'Diary does not exists.' };
 
         const existingUsers = await this.diaryUserRepository.find({ where: { diaryId: body.diaryId } });
@@ -285,7 +288,7 @@ export class DiaryService {
     }
 
     async emitDiaryNotification(diaryId: number, type: string, content: string, auth_user: User): Promise<any> {
-        const diary = await this.diaryRepository.findOne({ where: { id: diaryId }, relations: ['diaryUser', 'diaryUser.user'] });
+        const diary = await this.diaryRepository.findOne({ where: { id: diaryId, deletedAt: null }, relations: ['diaryUser', 'diaryUser.user'] });
         if (!diary) {
             return { error: 'Diary not found' };
         }

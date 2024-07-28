@@ -29,7 +29,7 @@ export class ChatsService {
 
     async getAllChannels(auth_user: User): Promise<ChatChannel[]> {
         console.log("==============chatGroupUser===============", auth_user)
-        const user = await this.userRepository.findOne({ where: { email: auth_user.email }, relations: ['family'] })
+        const user = await this.userRepository.findOne({ where: { email: auth_user.email, deletedAt: null }, relations: ['family'] })
         const family_members = user.family.members;
         const channels = [];
         for (let i = 0; i < family_members.length; i++) {
@@ -53,13 +53,14 @@ export class ChatsService {
             channels.push(new ChatChannel(element.id, element.fullName, [element], false, [], lastMessage, unReadCount, element.avatar, pin, mute));
         }
         const groups = await this.chatGroupRepository.createQueryBuilder("chat_group")
-            .leftJoinAndSelect("chat_group.chatGroupUser", "cgu")
-            .leftJoinAndSelect("cgu.user", "user")
-            .where("user.id = :userId", { userId: user.id })
+            .leftJoinAndSelect('chat_group.chatGroupUser', 'cgu')
+            .leftJoinAndSelect('cgu.user', 'user')
+            .where('user.deletedAt IS NULL')
+            .andWhere("user.id = :userId", { userId: user.id })
             .getMany();
 
         for (let i = 0; i < groups.length; i++) {
-            const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
+            const element = await this.chatGroupRepository.findOne({ where: { id: groups[i].id, deletedAt: null }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
 
             if (!element) {
                 console.error(`ChatGroup with id ${groups[i].id} not found`);
@@ -89,7 +90,7 @@ export class ChatsService {
 
     async getChannelInfo(auth_user: User, chatId: string, isGroup: Boolean): Promise<ChatChannel> {
         if (isGroup) {
-            const group = await this.chatGroupRepository.findOne({ where: { id: parseInt(chatId) }, relations: ['chatGroupUser', 'chatGroupUser.user'] })
+            const group = await this.chatGroupRepository.findOne({ where: { id: parseInt(chatId), deletedAt: null }, relations: ['chatGroupUser', 'chatGroupUser.user'] })
             const users = group.chatGroupUser.map(cgu => cgu.user);
             const messages = await this.chatRepository.find({
                 where: [
@@ -100,7 +101,7 @@ export class ChatsService {
             return new ChatChannel(group.id, group.name, users, true, messages, undefined, 0, group.image);
         }
         else {
-            const member = await this.userRepository.findOne({ where: { id: parseInt(chatId) }, relations: ['family'] })
+            const member = await this.userRepository.findOne({ where: { id: parseInt(chatId), deletedAt: null }, relations: ['family'] })
             const messages = await this.chatRepository.find({
                 where: [
                     { fromId: auth_user.id, toId: member.id },
@@ -114,7 +115,7 @@ export class ChatsService {
     }
 
     async createChannel(auth_user: User, body: { name: string, members: User[], image?: string }): Promise<any> {
-        const exist = await this.chatGroupRepository.findOne({ where: { name: body.name } });
+        const exist = await this.chatGroupRepository.findOne({ where: { name: body.name, deletedAt: null } });
         if (exist) return { success: false, error: 'Group subject already exists' };
         const newGroup = await this.chatGroupRepository.create({
             name: body.name,
@@ -136,7 +137,7 @@ export class ChatsService {
         return { success: true };
     }
 
-    async deleteChannel(id: number, userId: number): Promise<{ error?: string }> {
+    async deleteChannelUser(id: number, userId: number): Promise<{ error?: string }> {
         const exist = await this.chatGroupUserRepository.findOne({ where: { chatGroupId: id, userId: userId } });
         if (exist) {
             await this.chatGroupUserRepository.delete({ chatGroupId: id, userId: userId });
@@ -176,8 +177,8 @@ export class ChatsService {
         await this.chatRepository.save(message);
         return {
             ...message,
-            from: await this.userRepository.findOne({ where: { id: msg.fromId } }),
-            to: await this.userRepository.findOne({ where: { id: msg.toId } }),
+            from: await this.userRepository.findOne({ where: { id: msg.fromId, deletedAt: null } }),
+            to: await this.userRepository.findOne({ where: { id: msg.toId, deletedAt: null } }),
         };
     }
 
@@ -207,7 +208,7 @@ export class ChatsService {
 
 
     async getGroupUsers(channelId: number): Promise<User[]> {
-        const channel = await this.chatGroupRepository.findOne({ where: { id: channelId }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
+        const channel = await this.chatGroupRepository.findOne({ where: { id: channelId, deletedAt: null }, relations: ['chatGroupUser', 'chatGroupUser.user'] });
         const users = channel.chatGroupUser.map(cgu => cgu.user);
         return users.filter(user => user.id != channel.id);
     }
